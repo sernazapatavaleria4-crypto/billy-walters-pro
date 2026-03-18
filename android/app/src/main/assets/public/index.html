@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🤠 Billy Walters PRO — NBA & MLB Analytics Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#E8B84B;--gold2:#c9962a;--gold-dim:rgba(232,184,75,.12);
+  --bg:#05050d;--bg1:#08081a;--bg2:#0c0c20;--bg3:#101028;
+  --border:#181830;--border2:#222244;
+  --text:#dde0f5;--muted:#4a5080;--muted2:#6a70a0;
+  --green:#00e07a;--red:#ff3547;--blue:#4488ff;--purple:#b44dff;--orange:#ff8c00;
+  --radius:10px;
+  --glow:0 0 40px rgba(232,184,75,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 40% at 50% -10%,rgba(232,184,75,.04),transparent),radial-gradient(ellipse 60% 30% at 80% 100%,rgba(68,136,255,.03),transparent);pointer-events:none;z-index:0}
+
+/* ─── LAYOUT ─── */
+.app{position:relative;z-index:1}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:var(--bg1);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;transition:.3s}
+.main{margin-left:240px;min-height:100vh}
+@media(max-width:768px){.sidebar{transform:translateX(-100%);width:220px}.sidebar.open{transform:none}.main{margin-left:0}}
+
+/* ─── SIDEBAR ─── */
+.logo{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
+.logo-icon{font-size:2em;display:block;margin-bottom:6px}
+.logo-name{font-family:'Bebas Neue',cursive;font-size:1.6em;color:var(--gold);letter-spacing:2px;line-height:1}
+.logo-sub{font-size:.62em;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:3px}
+.nav{padding:14px 10px;flex:1;overflow-y:auto}
+.nav-section{font-size:.58em;color:var(--muted);text-transform:uppercase;letter-spacing:2px;padding:12px 10px 6px;font-family:'DM Mono',monospace}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;color:var(--muted2);font-size:.82em;font-weight:500;transition:all .15s;margin-bottom:2px;border:1px solid transparent}
+.nav-item:hover{background:var(--bg2);color:var(--text)}
+.nav-item.active{background:var(--gold-dim);color:var(--gold);border-color:rgba(232,184,75,.2)}
+.nav-item .icon{font-size:1em;width:18px;text-align:center}
+.nav-badge{margin-left:auto;background:var(--gold);color:#000;font-size:.6em;font-weight:700;padding:1px 6px;border-radius:10px;font-family:'DM Mono',monospace}
+.sidebar-stats{padding:14px;border-top:1px solid var(--border)}
+.ss-title{font-size:.6em;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-family:'DM Mono',monospace}
+.ss-row{display:flex;justify-content:space-between;margin-bottom:6px}
+.ss-val{font-size:.85em;font-weight:700;color:var(--gold);font-family:'DM Mono',monospace}
+.ss-lbl{font-size:.65em;color:var(--muted);align-self:center}
+
+/* ─── TOPBAR ─── */
+.topbar{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;background:rgba(8,8,26,.8);backdrop-filter:blur(12px);position:sticky;top:0;z-index:50}
+.topbar-title{font-family:'Bebas Neue',cursive;font-size:1.4em;color:var(--gold);letter-spacing:2px}
+.topbar-breadcrumb{font-size:.72em;color:var(--muted);font-family:'DM Mono',monospace}
+.topbar-spacer{flex:1}
+.bankroll-display{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;cursor:pointer}
+.bd-lbl{font-size:.65em;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.bd-val{font-size:1em;font-weight:700;color:var(--gold);font-family:'DM Mono',monospace}
+.hamburger{display:none;background:none;border:none;color:var(--text);font-size:1.3em;cursor:pointer;padding:4px}
+@media(max-width:768px){.hamburger{display:block}}
+
+/* ─── PANELS ─── */
+.panel{display:none;padding:20px 24px;animation:fadeIn .3s ease}
+.panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ─── PAGE HEADER ─── */
+.page-header{margin-bottom:22px}
+.page-title{font-family:'Bebas Neue',cursive;font-size:2em;color:var(--text);letter-spacing:2px;line-height:1}
+.page-sub{font-size:.75em;color:var(--muted);margin-top:4px;letter-spacing:.5px}
+
+/* ─── CARDS ─── */
+.card{background:var(--bg1);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.card-title{font-size:.7em;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:14px;font-family:'DM Mono',monospace}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:900px){.grid-3{grid-template-columns:1fr 1fr}.grid-4{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
+
+/* ─── STAT CARDS ─── */
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px;position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card.gold::after{background:var(--gold)}
+.stat-card.green::after{background:var(--green)}
+.stat-card.red::after{background:var(--red)}
+.stat-card.blue::after{background:var(--blue)}
+.sc-val{font-family:'Bebas Neue',cursive;font-size:2.2em;color:var(--text);line-height:1;letter-spacing:1px}
+.sc-lbl{font-size:.62em;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+.sc-sub{font-size:.7em;margin-top:3px;font-family:'DM Mono',monospace}
+
+/* ─── ANALYZER ─── */
+.sport-tabs{display:flex;gap:4px;margin-bottom:18px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:4px}
+.sport-tab{flex:1;padding:10px;text-align:center;border-radius:7px;cursor:pointer;font-weight:700;font-size:.82em;color:var(--muted2);transition:all .2s;letter-spacing:.5px;text-transform:uppercase}
+.sport-tab.on{background:var(--gold);color:#000}
+.team-select{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:11px 14px;font-size:.88em;outline:none;font-family:'DM Sans',sans-serif;cursor:pointer;transition:.15s;-webkit-appearance:none}
+.team-select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(232,184,75,.1)}
+optgroup,option{background:var(--bg2);color:var(--text)}
+.sel-lbl{font-size:.65em;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;font-family:'DM Mono',monospace}
+.vs-divider{display:flex;align-items:center;justify-content:center;padding-top:22px}
+.vs-badge{font-family:'Bebas Neue',cursive;font-size:1.8em;color:var(--gold);background:var(--bg2);border:1px solid var(--border2);border-radius:50%;width:48px;height:48px;display:flex;align-items:center;justify-content:center;letter-spacing:1px}
+.bankroll-input-row{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-top:14px}
+.br-lbl{font-size:.7em;color:var(--muted);white-space:nowrap}
+.br-input{background:transparent;border:none;color:var(--gold);font-size:1.05em;font-weight:700;font-family:'DM Mono',monospace;width:110px;outline:none;text-align:right}
+.br-hint{font-size:.65em;color:var(--muted);margin-left:auto}
+.btn-analyze{width:100%;background:linear-gradient(135deg,#1a1200,var(--gold));border:none;border-radius:10px;color:#06040c;font-size:.95em;font-weight:900;padding:15px;cursor:pointer;letter-spacing:3px;text-transform:uppercase;font-family:'DM Sans',sans-serif;transition:all .2s;margin-top:14px;position:relative;overflow:hidden}
+.btn-analyze::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);transform:translateX(-100%);transition:.4s}
+.btn-analyze:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(232,184,75,.3)}
+.btn-analyze:hover::after{transform:translateX(100%)}
+.btn-analyze:active{transform:none}
+
+/* ─── TEAM PREVIEW ─── */
+.team-preview{margin-top:10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;min-height:60px}
+.tp-name{font-weight:700;font-size:.9em;color:var(--text);margin-bottom:6px}
+.tp-stats{display:flex;flex-wrap:wrap;gap:6px}
+.tp-pill{background:var(--bg3);border:1px solid var(--border2);border-radius:5px;padding:3px 8px;font-family:'DM Mono',monospace;font-size:.65em;color:var(--muted2)}
+.tp-pill.hl{color:var(--gold);border-color:rgba(232,184,75,.2)}
+
+/* ─── RESULTS ─── */
+.result-wrap{margin-top:18px;animation:fadeIn .4s ease}
+.conf-badge{display:flex;align-items:center;gap:14px;border-radius:10px;padding:14px 18px;margin-bottom:16px;border:1px solid}
+.conf-icon{font-size:2em}
+.conf-title{font-weight:800;font-size:1em;letter-spacing:.5px}
+.conf-desc{font-size:.72em;color:var(--muted2);margin-top:2px;font-family:'DM Mono',monospace}
+.matchup-grid{display:grid;grid-template-columns:1fr 60px 1fr;gap:10px;align-items:center;margin-bottom:16px}
+.team-block{background:var(--bg2);border-radius:10px;padding:12px 14px;border:1px solid var(--border)}
+.team-block.home{border-left:3px solid var(--blue)}
+.team-block.away{border-right:3px solid var(--orange);text-align:right}
+.tb-name{font-weight:700;font-size:.9em;line-height:1.2}
+.tb-info{font-size:.62em;color:var(--muted);font-family:'DM Mono',monospace;margin-top:4px;line-height:1.6}
+.tb-prob{font-family:'Bebas Neue',cursive;font-size:1.8em;line-height:1;margin-top:4px}
+.vs-circle{font-family:'Bebas Neue',cursive;font-size:1.5em;color:var(--gold);text-align:center;background:var(--bg2);border:1px solid var(--border);border-radius:50%;width:52px;height:52px;display:flex;align-items:center;justify-content:center;margin:0 auto}
+
+/* ─── PROB BARS ─── */
+.prob-section{background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:12px;border:1px solid var(--border)}
+.section-label{font-size:.62em;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:12px;font-family:'DM Mono',monospace}
+.prow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.plbl{min-width:140px;font-size:.74em;font-weight:600;flex-shrink:0}
+.pbar{flex:1;height:24px;background:var(--bg3);border-radius:5px;overflow:hidden;border:1px solid var(--border)}
+.pbf{height:100%;border-radius:5px;display:flex;align-items:center;justify-content:flex-end;padding-right:7px;transition:width .6s ease}
+.pbf span{font-size:.68em;font-weight:700;color:rgba(0,0,0,.8)}
+.pmeta{min-width:90px;font-size:.62em;color:var(--muted);text-align:right;font-family:'DM Mono',monospace;flex-shrink:0}
+
+/* ─── KELLY GRID ─── */
+.kelly-section{background:rgba(232,184,75,.04);border:1px solid rgba(232,184,75,.18);border-radius:10px;padding:14px;margin-bottom:12px}
+.kelly-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:10px}
+.kcard{background:var(--bg2);border-radius:8px;padding:11px 8px;text-align:center;border:1px solid var(--border);transition:.2s}
+.kcard:hover{border-color:var(--border2);transform:translateY(-2px)}
+.kcard.main{border-color:var(--gold);background:rgba(232,184,75,.06)}
+.kval{font-family:'Bebas Neue',cursive;font-size:1.6em;line-height:1;letter-spacing:.5px}
+.kval.g{color:var(--green)}.kval.o{color:var(--orange)}.kval.r{color:var(--red)}.kval.bw{color:var(--gold)}
+.klbl{font-size:.6em;color:var(--muted);text-transform:uppercase;margin-top:4px;line-height:1.3;font-family:'DM Mono',monospace}
+.kamt{font-size:.7em;color:var(--muted2);margin-top:3px;font-family:'DM Mono',monospace}
+
+/* ─── SIGNALS ─── */
+.signals-section{background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:12px;border:1px solid var(--border)}
+.sig-item{display:flex;gap:10px;background:var(--bg3);border-radius:7px;padding:9px 11px;margin-bottom:6px;border-left:3px solid}
+.si-title{font-weight:700;font-size:.76em;margin-bottom:2px}
+.si-desc{font-size:.7em;color:var(--muted2);line-height:1.5}
+.verdict-box{background:var(--bg2);border-left:4px solid var(--gold);border-radius:0 10px 10px 0;padding:14px 16px;margin-bottom:12px;border:1px solid var(--border)}
+.verdict-lbl{font-size:.6em;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-family:'DM Mono',monospace}
+.verdict-text{font-size:.86em;color:#c8b87a;line-height:1.7}
+.avoid-box{background:#0a0508;border:1px solid rgba(255,53,71,.2);border-radius:8px;padding:11px 13px}
+.av-title{color:var(--red);font-size:.62em;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-family:'DM Mono',monospace}
+.av-item{font-size:.78em;color:#dd7777;margin:3px 0;line-height:1.5}
+.save-btn{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;color:var(--gold);padding:11px;cursor:pointer;font-size:.82em;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:'DM Sans',sans-serif;transition:.15s;margin-top:10px}
+.save-btn:hover{background:var(--gold-dim);border-color:rgba(232,184,75,.35)}
+
+/* ─── HISTORY TABLE ─── */
+.table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:.78em}
+thead tr{background:var(--bg2);border-bottom:2px solid var(--border)}
+th{padding:10px 12px;text-align:left;font-size:.62em;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-family:'DM Mono',monospace;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+tr:last-child td{border:none}
+tr:hover td{background:var(--bg2)}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:5px;font-size:.68em;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:.5px}
+.badge.win{background:rgba(0,224,122,.12);color:var(--green);border:1px solid rgba(0,224,122,.2)}
+.badge.loss{background:rgba(255,53,71,.1);color:var(--red);border:1px solid rgba(255,53,71,.18)}
+.badge.push{background:rgba(232,184,75,.1);color:var(--gold);border:1px solid rgba(232,184,75,.18)}
+.badge.pending{background:rgba(74,80,128,.15);color:var(--muted2);border:1px solid var(--border2)}
+.badge.nba{background:rgba(68,136,255,.1);color:var(--blue);border:1px solid rgba(68,136,255,.18)}
+.badge.mlb{background:rgba(180,77,255,.1);color:var(--purple);border:1px solid rgba(180,77,255,.18)}
+.result-select{background:var(--bg2);border:1px solid var(--border2);border-radius:5px;color:var(--text);padding:4px 8px;font-size:.78em;cursor:pointer;outline:none}
+.result-select:focus{border-color:var(--gold)}
+.empty-state{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty-state .es-icon{font-size:3em;display:block;margin-bottom:10px}
+.empty-state .es-text{font-size:.85em}
+.empty-state .es-sub{font-size:.72em;margin-top:6px;color:var(--muted)}
+
+/* ─── DATABASE / TEAMS ─── */
+.team-table-wrap{overflow-x:auto}
+.team-row td:first-child{font-weight:600}
+.rating-bar{height:6px;border-radius:3px;background:var(--bg3);overflow:hidden;margin-top:3px;width:80px}
+.rb-fill{height:100%;border-radius:3px}
+.filter-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.filter-btn{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--muted2);padding:5px 12px;font-size:.72em;cursor:pointer;transition:.15s;font-family:'DM Sans',sans-serif}
+.filter-btn.on{background:var(--gold-dim);color:var(--gold);border-color:rgba(232,184,75,.3)}
+.search-input{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 14px;font-size:.82em;outline:none;font-family:'DM Sans',sans-serif;width:100%;max-width:260px;transition:.15s}
+.search-input:focus{border-color:var(--gold)}
+
+/* ─── DASHBOARD METRICS ─── */
+.metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+@media(max-width:900px){.metrics-row{grid-template-columns:1fr 1fr}}
+.metric-card{background:var(--bg1);border:1px solid var(--border);border-radius:10px;padding:16px;position:relative;overflow:hidden}
+.mc-icon{font-size:1.5em;margin-bottom:8px;display:block}
+.mc-val{font-family:'Bebas Neue',cursive;font-size:2.4em;line-height:1;letter-spacing:1px}
+.mc-lbl{font-size:.62em;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:3px;font-family:'DM Mono',monospace}
+.mc-change{font-size:.68em;margin-top:6px;font-family:'DM Mono',monospace}
+.mc-change.up{color:var(--green)}.mc-change.dn{color:var(--red)}.mc-change.flat{color:var(--muted)}
+
+/* ─── CHART ─── */
+.mini-chart{height:60px;display:flex;align-items:flex-end;gap:3px;padding:0 2px}
+.mc-bar{flex:1;border-radius:3px 3px 0 0;transition:.3s;min-height:4px;cursor:pointer}
+.mc-bar:hover{filter:brightness(1.3)}
+
+/* ─── TOAST ─── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--gold);border-radius:10px;padding:12px 18px;font-size:.82em;color:var(--text);z-index:9999;transform:translateY(100px);opacity:0;transition:.3s;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.toast.show{transform:none;opacity:1}
+
+/* ─── MODAL ─── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg1);border:1px solid var(--border);border-radius:14px;padding:24px;width:90%;max-width:420px}
+.modal-title{font-family:'Bebas Neue',cursive;font-size:1.4em;color:var(--gold);letter-spacing:1px;margin-bottom:16px}
+.modal input{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:11px 14px;font-size:.9em;outline:none;font-family:'DM Mono',monospace;margin-bottom:12px}
+.modal input:focus{border-color:var(--gold)}
+.modal-btns{display:flex;gap:8px;margin-top:4px}
+.modal-btn{flex:1;padding:11px;border-radius:8px;border:none;cursor:pointer;font-weight:700;font-size:.85em;transition:.15s}
+.modal-btn.primary{background:var(--gold);color:#000}
+.modal-btn.secondary{background:var(--bg2);color:var(--muted2);border:1px solid var(--border2)}
+
+/* ─── PERFORMANCE CHART ─── */
+.perf-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.pnl-chart{height:120px;position:relative;border-bottom:1px solid var(--border);margin-bottom:8px}
+.pnl-line{stroke:var(--gold);stroke-width:2;fill:none}
+.pnl-area{fill:url(#goldGrad);opacity:.3}
+.pnl-dot{fill:var(--gold)}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+
+/* ─── MISC ─── */
+.divider{height:1px;background:var(--border);margin:16px 0}
+.tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:.62em;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:.5px}
+.tag.e{background:rgba(68,136,255,.12);color:var(--blue);border:1px solid rgba(68,136,255,.2)}
+.tag.w{background:rgba(255,140,0,.1);color:var(--orange);border:1px solid rgba(255,140,0,.18)}
+.tag.al{background:rgba(180,77,255,.1);color:var(--purple);border:1px solid rgba(180,77,255,.18)}
+.tag.nl{background:rgba(0,224,122,.1);color:var(--green);border:1px solid rgba(0,224,122,.18)}
+.tooltip{position:relative}
+.tooltip::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:4px 10px;font-size:.65em;color:var(--text);white-space:nowrap;pointer-events:none;opacity:0;transition:.2s;z-index:99}
+.tooltip:hover::after{opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ─── SIDEBAR ─── -->
+<aside class="sidebar" id="sidebar">
+  <div class="logo">
+    <span class="logo-icon">🤠</span>
+    <div class="logo-name">Billy Walters</div>
+    <div class="logo-sub">PRO Analytics Platform</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">Principal</div>
+    <div class="nav-item active" onclick="showPanel('dashboard',this)"><span class="icon">📊</span>Dashboard</div>
+    <div class="nav-item" onclick="showPanel('analyzer',this)"><span class="icon">🎯</span>Analizador<span class="nav-badge">LIVE</span></div>
+
+    <div class="nav-section">Bases de Datos</div>
+    <div class="nav-item" onclick="showPanel('nba-db',this)"><span class="icon">🏀</span>NBA Teams</div>
+    <div class="nav-item" onclick="showPanel('mlb-db',this)"><span class="icon">⚾</span>MLB Teams</div>
+
+    <div class="nav-section">Historial</div>
+    <div class="nav-item" onclick="showPanel('history',this)"><span class="icon">📋</span>Mis Picks<span class="nav-badge" id="picks-badge">0</span></div>
+    <div class="nav-item" onclick="showPanel('performance',this)"><span class="icon">📈</span>Performance</div>
+
+    <div class="nav-section">Herramientas</div>
+    <div class="nav-item" onclick="showPanel('kelly-calc',this)"><span class="icon">💰</span>Kelly Calculator</div>
+    <div class="nav-item" onclick="showPanel('settings',this)"><span class="icon">⚙️</span>Configuración</div>
+  </nav>
+  <div class="sidebar-stats">
+    <div class="ss-title">Sesión Actual</div>
+    <div class="ss-row"><span class="ss-lbl">Picks</span><span class="ss-val" id="sb-picks">0</span></div>
+    <div class="ss-row"><span class="ss-lbl">Win Rate</span><span class="ss-val" id="sb-wr">—</span></div>
+    <div class="ss-row"><span class="ss-lbl">P&L</span><span class="ss-val" id="sb-pnl">$0</span></div>
+  </div>
+</aside>
+
+<!-- ─── MAIN ─── -->
+<main class="main">
+  <div class="topbar">
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <div class="topbar-title">Billy Walters PRO</div>
+    <span class="topbar-breadcrumb" id="breadcrumb">/ Dashboard</span>
+    <div class="topbar-spacer"></div>
+    <div class="bankroll-display" onclick="openBankrollModal()">
+      <div><div class="bd-lbl">Bankroll</div><div class="bd-val" id="bankroll-display">$1,000</div></div>
+      <span style="color:var(--muted);font-size:.8em">✏️</span>
+    </div>
+  </div>
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <div class="panel active" id="panel-dashboard">
+    <div class="page-header">
+      <div class="page-title">Dashboard</div>
+      <div class="page-sub">Vista general · Sharp Money · Information Edge · Kelly Sizing</div>
+    </div>
+
+    <div class="metrics-row">
+      <div class="metric-card">
+        <span class="mc-icon">🎯</span>
+        <div class="mc-val" id="dash-picks" style="color:var(--gold)">0</div>
+        <div class="mc-lbl">Total Picks</div>
+        <div class="mc-change flat" id="dash-picks-sub">Sin picks aún</div>
+      </div>
+      <div class="metric-card">
+        <span class="mc-icon">✅</span>
+        <div class="mc-val" id="dash-wr" style="color:var(--green)">—</div>
+        <div class="mc-lbl">Win Rate</div>
+        <div class="mc-change flat" id="dash-wr-sub">Walters: 57-58%</div>
+      </div>
+      <div class="metric-card">
+        <span class="mc-icon">💰</span>
+        <div class="mc-val" id="dash-pnl" style="color:var(--gold)">$0</div>
+        <div class="mc-lbl">P&L Total</div>
+        <div class="mc-change flat" id="dash-pnl-sub">Resultado neto</div>
+      </div>
+      <div class="metric-card">
+        <span class="mc-icon">📐</span>
+        <div class="mc-val" id="dash-roi" style="color:var(--blue)">—</div>
+        <div class="mc-lbl">ROI</div>
+        <div class="mc-change flat" id="dash-roi-sub">Return on investment</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:14px">
+      <div class="card">
+        <div class="card-title">📊 Picks Recientes</div>
+        <div id="recent-picks-list"><div class="empty-state"><span class="es-icon">🎯</span><div class="es-text">No hay picks aún</div><div class="es-sub">Usa el Analizador para generar picks</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🏆 Rendimiento por Deporte</div>
+        <div id="sport-breakdown">
+          <div style="margin-bottom:14px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:.8em">🏀 NBA</span><span id="nba-record" style="font-family:'DM Mono',monospace;font-size:.75em;color:var(--muted)">0-0</span></div>
+            <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div id="nba-bar" style="height:100%;background:var(--blue);border-radius:3px;width:0%;transition:.5s"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:.8em">⚾ MLB</span><span id="mlb-record" style="font-family:'DM Mono',monospace;font-size:.75em;color:var(--muted)">0-0</span></div>
+            <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div id="mlb-bar" style="height:100%;background:var(--purple);border-radius:3px;width:0%;transition:.5s"></div></div>
+          </div>
+          <div class="divider"></div>
+          <div class="grid-2" style="gap:8px;margin-top:10px">
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-family:'Bebas Neue',cursive;font-size:1.6em;color:var(--green)" id="dash-wins">0</div>
+              <div style="font-size:.6em;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Ganados</div>
+            </div>
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-family:'Bebas Neue',cursive;font-size:1.6em;color:var(--red)" id="dash-losses">0</div>
+              <div style="font-size:.6em;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Perdidos</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Billy Stats -->
+    <div class="card">
+      <div class="card-title">🤠 Método Billy Walters — Referencia</div>
+      <div class="grid-4">
+        <div class="stat-card gold"><div class="sc-val" style="color:var(--gold)">~$300M</div><div class="sc-lbl">Ganado en vida</div><div class="sc-sub" style="color:var(--muted)">Est. career earnings</div></div>
+        <div class="stat-card green"><div class="sc-val" style="color:var(--green)">57-58%</div><div class="sc-lbl">Win Rate histórico</div><div class="sc-sub" style="color:var(--muted)">Vs 52.4% breakeven</div></div>
+        <div class="stat-card blue"><div class="sc-val" style="color:var(--blue)">30+</div><div class="sc-lbl">Años ganando</div><div class="sc-sub" style="color:var(--muted)">1980s–2010s</div></div>
+        <div class="stat-card red"><div class="sc-val" style="color:var(--orange)">CLV+</div><div class="sc-lbl">Beat The Closer</div><div class="sc-sub" style="color:var(--muted)">Sharp money signal</div></div>
+      </div>
+      <div class="divider"></div>
+      <div style="font-size:.78em;color:var(--muted2);line-height:1.8">
+        Billy Walters usaba <strong style="color:var(--gold)">ventajas de información</strong>, equipos de scouts, y análisis estadístico profundo para encontrar líneas con valor real.
+        Su método: apostar cuando tenías un <strong style="color:var(--gold)">edge real del 3-5%+</strong> sobre el cierre de la línea. Nunca apostaba por "feeling" — solo por <strong style="color:var(--gold)">modelos cuantitativos</strong>.
+        El <strong style="color:var(--gold)">Kelly Criterion fraccionado (30%)</strong> era su herramienta para sizing — nunca arriesgaba más del 12% del bankroll en un solo juego.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ANALYZER ═══ -->
+  <div class="panel" id="panel-analyzer">
+    <div class="page-header">
+      <div class="page-title">Analizador</div>
+      <div class="page-sub">Modelos RF + Gradient Boosting + Monte Carlo · 60,000 simulaciones</div>
+    </div>
+    <div class="grid-2" style="align-items:start">
+      <div>
+        <div class="card">
+          <div class="sport-tabs">
+            <div class="sport-tab on" id="tab-nba" onclick="switchSport('nba')">🏀 NBA</div>
+            <div class="sport-tab" id="tab-mlb" onclick="switchSport('mlb')">⚾ MLB</div>
+          </div>
+
+          <!-- NBA -->
+          <div id="nba-form">
+            <div class="grid-2" style="gap:12px;align-items:start">
+              <div>
+                <div class="sel-lbl">🏠 Local</div>
+                <select class="team-select" id="nba-home" onchange="updateNBAPreview('home')"></select>
+                <div class="team-preview" id="nba-home-preview"><div style="color:var(--muted);font-size:.75em">Selecciona equipo...</div></div>
+              </div>
+              <div>
+                <div class="sel-lbl">✈️ Visitante</div>
+                <select class="team-select" id="nba-away" onchange="updateNBAPreview('away')"></select>
+                <div class="team-preview" id="nba-away-preview"><div style="color:var(--muted);font-size:.75em">Selecciona equipo...</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MLB -->
+          <div id="mlb-form" style="display:none">
+            <div class="grid-2" style="gap:12px;align-items:start">
+              <div>
+                <div class="sel-lbl">🏠 Local</div>
+                <select class="team-select" id="mlb-home" onchange="updateMLBPreview('home')"></select>
+                <div class="team-preview" id="mlb-home-preview"><div style="color:var(--muted);font-size:.75em">Selecciona equipo...</div></div>
+              </div>
+              <div>
+                <div class="sel-lbl">✈️ Visitante</div>
+                <select class="team-select" id="mlb-away" onchange="updateMLBPreview('away')"></select>
+                <div class="team-preview" id="mlb-away-preview"><div style="color:var(--muted);font-size:.75em">Selecciona equipo...</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bankroll-input-row">
+            <span class="br-lbl">💰 Bankroll</span>
+            <input type="number" class="br-input" id="analyzer-bank" value="1000" min="1" step="100">
+            <span class="br-hint">USD — Kelly calcula el tamaño exacto</span>
+          </div>
+          <button class="btn-analyze" id="analyze-btn" onclick="runAnalyzer()">🤠 ANALIZAR CON BILLY WALTERS</button>
+        </div>
+      </div>
+      <div id="result-column">
+        <div style="color:var(--muted);text-align:center;padding:60px 20px;border:1px dashed var(--border);border-radius:10px">
+          <div style="font-size:2.5em;margin-bottom:10px">🎯</div>
+          <div style="font-size:.85em">El análisis aparecerá aquí</div>
+          <div style="font-size:.72em;margin-top:6px;color:var(--muted)">Selecciona dos equipos y presiona Analizar</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ NBA DATABASE ═══ -->
+  <div class="panel" id="panel-nba-db">
+    <div class="page-header">
+      <div class="page-title">NBA — Base de Datos</div>
+      <div class="page-sub">30 equipos · Temporada 2025-26 · Estadísticas completas</div>
+    </div>
+    <div class="card">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center">
+        <input class="search-input" id="nba-search" placeholder="🔍 Buscar equipo..." oninput="renderNBATable()">
+        <div class="filter-row" style="margin:0">
+          <button class="filter-btn on" onclick="setNBAFilter('all',this)">Todos</button>
+          <button class="filter-btn" onclick="setNBAFilter('E',this)">Este</button>
+          <button class="filter-btn" onclick="setNBAFilter('W',this)">Oeste</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table id="nba-table">
+          <thead><tr>
+            <th>#</th><th>Equipo</th><th>Conf</th><th>División</th>
+            <th>Off Rtg</th><th>Def Rtg</th><th>Net Rtg</th><th>Form</th><th>Pace</th><th>Rating</th>
+          </tr></thead>
+          <tbody id="nba-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MLB DATABASE ═══ -->
+  <div class="panel" id="panel-mlb-db">
+    <div class="page-header">
+      <div class="page-title">MLB — Base de Datos</div>
+      <div class="page-sub">30 equipos · Temporada 2026 · Estadísticas completas</div>
+    </div>
+    <div class="card">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center">
+        <input class="search-input" id="mlb-search" placeholder="🔍 Buscar equipo..." oninput="renderMLBTable()">
+        <div class="filter-row" style="margin:0">
+          <button class="filter-btn on" onclick="setMLBFilter('all',this)">Todos</button>
+          <button class="filter-btn" onclick="setMLBFilter('AL',this)">AL</button>
+          <button class="filter-btn" onclick="setMLBFilter('NL',this)">NL</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table id="mlb-table">
+          <thead><tr>
+            <th>#</th><th>Equipo</th><th>Liga</th><th>División</th>
+            <th>Off/G</th><th>ERA</th><th>Bullpen</th><th>Park F</th><th>Payroll</th><th>Score</th>
+          </tr></thead>
+          <tbody id="mlb-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ HISTORY ═══ -->
+  <div class="panel" id="panel-history">
+    <div class="page-header">
+      <div class="page-title">Mis Picks</div>
+      <div class="page-sub">Historial completo · Actualiza el resultado para calcular P&L</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+      <button class="filter-btn on" onclick="setHistFilter('all',this)">Todos</button>
+      <button class="filter-btn" onclick="setHistFilter('NBA',this)">🏀 NBA</button>
+      <button class="filter-btn" onclick="setHistFilter('MLB',this)">⚾ MLB</button>
+      <button class="filter-btn" onclick="setHistFilter('pending',this)">⏳ Pendiente</button>
+      <button class="filter-btn" onclick="setHistFilter('win',this)">✅ Ganados</button>
+      <button class="filter-btn" onclick="setHistFilter('loss',this)">❌ Perdidos</button>
+      <button class="filter-btn" style="margin-left:auto;color:var(--red)" onclick="clearHistory()">🗑️ Limpiar todo</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Fecha</th><th>Deporte</th><th>Partido</th><th>Pick</th>
+          <th>Prob</th><th>Kelly</th><th>Monto</th><th>Resultado</th><th>P&L</th>
+        </tr></thead>
+        <tbody id="history-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ PERFORMANCE ═══ -->
+  <div class="panel" id="panel-performance">
+    <div class="page-header">
+      <div class="page-title">Performance</div>
+      <div class="page-sub">Análisis profundo de tu rendimiento como bettor</div>
+    </div>
+    <div class="grid-2" style="margin-bottom:14px">
+      <div class="card">
+        <div class="card-title">📈 P&L Acumulado</div>
+        <div id="pnl-chart-container" style="min-height:120px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.8em">
+          <span>Sin datos suficientes para graficar</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 Estadísticas Detalladas</div>
+        <div id="perf-stats">
+          <div class="empty-state" style="padding:20px"><span class="es-icon" style="font-size:2em">📊</span><div class="es-text" style="font-size:.8em">Sin datos</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card"><div class="card-title">🏀 NBA Performance</div><div id="perf-nba"><div class="empty-state" style="padding:16px"><span class="es-icon" style="font-size:1.5em">🏀</span><div class="es-text" style="font-size:.75em">Sin datos NBA</div></div></div></div>
+      <div class="card"><div class="card-title">⚾ MLB Performance</div><div id="perf-mlb"><div class="empty-state" style="padding:16px"><span class="es-icon" style="font-size:1.5em">⚾</span><div class="es-text" style="font-size:.75em">Sin datos MLB</div></div></div></div>
+      <div class="card"><div class="card-title">💎 Por Confianza</div><div id="perf-conf"><div class="empty-state" style="padding:16px"><span class="es-icon" style="font-size:1.5em">💎</span><div class="es-text" style="font-size:.75em">Sin datos</div></div></div></div>
+    </div>
+  </div>
+
+  <!-- ═══ KELLY CALCULATOR ═══ -->
+  <div class="panel" id="panel-kelly-calc">
+    <div class="page-header">
+      <div class="page-title">Kelly Calculator</div>
+      <div class="page-sub">Calcula el tamaño óptimo de apuesta según el Criterio de Kelly</div>
+    </div>
+    <div class="grid-2" style="align-items:start">
+      <div class="card">
+        <div class="card-title">⚙️ Parámetros</div>
+        <div style="margin-bottom:14px">
+          <div class="sel-lbl">Probabilidad estimada (%)</div>
+          <input type="number" id="kc-prob" class="br-input" style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:11px 14px;font-size:.9em;text-align:left" value="55" min="1" max="99" oninput="calcKelly()">
+        </div>
+        <div style="margin-bottom:14px">
+          <div class="sel-lbl">Cuota decimal (ej: 1.91)</div>
+          <input type="number" id="kc-odds" class="br-input" style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:11px 14px;font-size:.9em;text-align:left" value="1.91" min="1.01" step="0.01" oninput="calcKelly()">
+        </div>
+        <div style="margin-bottom:14px">
+          <div class="sel-lbl">Bankroll (USD)</div>
+          <input type="number" id="kc-bank" class="br-input" style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:11px 14px;font-size:.9em;text-align:left" value="1000" min="1" oninput="calcKelly()">
+        </div>
+        <div>
+          <div class="sel-lbl">Fracción Kelly</div>
+          <div class="filter-row" style="margin:0;margin-top:6px">
+            <button class="filter-btn" onclick="setKellyFrac(0.25,this)">25%</button>
+            <button class="filter-btn on" onclick="setKellyFrac(0.30,this)" id="kf-30">30%</button>
+            <button class="filter-btn" onclick="setKellyFrac(0.50,this)">50%</button>
+            <button class="filter-btn" onclick="setKellyFrac(1.00,this)">Full</button>
+          </div>
+        </div>
+      </div>
+      <div class="card" id="kelly-result">
+        <div class="card-title">📐 Resultado Kelly</div>
+        <div id="kelly-output">
+          <div class="empty-state" style="padding:20px"><span class="es-icon">💰</span><div class="es-text" style="font-size:.8em">Ajusta los parámetros</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-title">📚 Guía Kelly Criterion</div>
+      <div style="font-size:.8em;color:var(--muted2);line-height:1.9">
+        <strong style="color:var(--text)">Formula:</strong> <code style="background:var(--bg2);padding:2px 8px;border-radius:4px;font-family:'DM Mono',monospace;color:var(--gold)">f* = (b·p - q) / b</code> donde <code style="background:var(--bg2);padding:2px 6px;border-radius:4px;font-family:'DM Mono',monospace">b = cuota-1, p = probabilidad, q = 1-p</code><br>
+        <strong style="color:var(--text)">Billy Walters usaba Kelly Fraccionado al 30%</strong> para reducir la varianza sin sacrificar mucho del crecimiento óptimo.<br>
+        <strong style="color:var(--text)">Regla de oro:</strong> Nunca apostar más del <strong style="color:var(--gold)">12% del bankroll</strong> en un solo juego, sin importar el edge calculado.
+        El Kelly Full puede llevar a <strong style="color:var(--red)">ruina del bankroll</strong> incluso con edge real — siempre usa la versión fraccionada.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SETTINGS ═══ -->
+  <div class="panel" id="panel-settings">
+    <div class="page-header">
+      <div class="page-title">Configuración</div>
+      <div class="page-sub">Personaliza tu experiencia en la plataforma</div>
+    </div>
+    <div class="grid-2" style="align-items:start">
+      <div class="card">
+        <div class="card-title">💰 Bankroll Principal</div>
+        <div style="font-size:.78em;color:var(--muted2);margin-bottom:12px">Este es el bankroll que se usará en el Analizador por defecto</div>
+        <input type="number" id="settings-bank" style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:11px 14px;font-size:.9em;outline:none;font-family:'DM Mono',monospace;margin-bottom:12px">
+        <button onclick="saveBankroll()" style="width:100%;background:var(--gold);border:none;border-radius:8px;color:#000;padding:11px;font-weight:700;cursor:pointer;font-size:.85em">Guardar Bankroll</button>
+        <div class="divider"></div>
+        <div class="card-title">🔧 Fracción Kelly Default</div>
+        <div class="filter-row" style="margin:0;margin-top:6px">
+          <button class="filter-btn" onclick="setDefaultKelly(0.25,this)">25%</button>
+          <button class="filter-btn on" id="dk-30" onclick="setDefaultKelly(0.30,this)">30% (Walters)</button>
+          <button class="filter-btn" onclick="setDefaultKelly(0.50,this)">50%</button>
+          <button class="filter-btn" onclick="setDefaultKelly(1.00,this)">Full Kelly</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 Datos & Storage</div>
+        <div style="font-size:.78em;color:var(--muted2);margin-bottom:14px">Todos los datos se guardan en tu navegador (IndexedDB). No se envía nada a ningún servidor.</div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:.75em">Picks guardados</span><span style="font-family:'DM Mono',monospace;font-size:.75em;color:var(--gold)" id="storage-count">0</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="font-size:.75em">Última actualización</span><span style="font-family:'DM Mono',monospace;font-size:.75em;color:var(--muted)" id="storage-last">—</span></div>
+        </div>
+        <button onclick="exportData()" style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:11px;cursor:pointer;font-size:.82em;font-weight:700;margin-bottom:8px">📥 Exportar JSON</button>
+        <button onclick="if(confirm('¿Seguro? Esto borrará TODOS tus picks.'))clearHistory()" style="width:100%;background:#0a0508;border:1px solid rgba(255,53,71,.2);border-radius:8px;color:var(--red);padding:11px;cursor:pointer;font-size:.82em;font-weight:700">🗑️ Borrar todos los datos</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<!-- ─── BANKROLL MODAL ─── -->
+<div class="modal-overlay" id="bank-modal">
+  <div class="modal">
+    <div class="modal-title">💰 Editar Bankroll</div>
+    <input type="number" id="modal-bank-input" placeholder="Ingresa tu bankroll...">
+    <div class="modal-btns">
+      <button class="modal-btn secondary" onclick="closeBankrollModal()">Cancelar</button>
+      <button class="modal-btn primary" onclick="confirmBankroll()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── TOAST ─── -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DATABASE — NBA (30 equipos, temporada 2025-26)
+// ═══════════════════════════════════════════════════════
+const NBA_DB = {
+  "Boston Celtics":         {conf:"E",div:"Atlántico",o:120.1,d:108.7,f:0.764,p:99.2,w:54,l:14,streak:3,home:"28-7",road:"26-7"},
+  "Detroit Pistons":        {conf:"E",div:"Central",  o:119.2,d:109.1,f:0.776,p:100.5,w:52,l:16,streak:5,home:"28-8",road:"24-8"},
+  "Indiana Pacers":         {conf:"E",div:"Central",  o:118.7,d:118.9,f:0.263,p:103.1,w:21,l:45,streak:-2,home:"12-22",road:"9-23"},
+  "Oklahoma City Thunder":  {conf:"W",div:"Noroeste", o:118.5,d:109.2,f:0.759,p:99.8,w:53,l:15,streak:4,home:"29-7",road:"24-8"},
+  "Denver Nuggets":         {conf:"W",div:"Noroeste", o:116.4,d:112.1,f:0.632,p:96.4,w:44,l:24,streak:1,home:"25-11",road:"19-13"},
+  "Los Angeles Lakers":     {conf:"W",div:"Pacífico", o:115.8,d:111.9,f:0.618,p:98.6,w:43,l:25,streak:2,home:"23-12",road:"20-13"},
+  "Phoenix Suns":           {conf:"W",div:"Pacífico", o:115.2,d:113.1,f:0.579,p:99.3,w:40,l:28,streak:-1,home:"22-13",road:"18-15"},
+  "Cleveland Cavaliers":    {conf:"E",div:"Central",  o:115.3,d:111.4,f:0.621,p:96.8,w:43,l:25,streak:3,home:"24-11",road:"19-14"},
+  "New York Knicks":        {conf:"E",div:"Atlántico",o:114.8,d:111.2,f:0.632,p:97.4,w:44,l:24,streak:2,home:"25-10",road:"19-14"},
+  "Minnesota Timberwolves": {conf:"W",div:"Noroeste", o:114.7,d:110.8,f:0.614,p:97.2,w:43,l:25,streak:1,home:"23-12",road:"20-13"},
+  "Golden State Warriors":  {conf:"W",div:"Pacífico", o:114.2,d:113.8,f:0.518,p:100.1,w:36,l:32,streak:-2,home:"20-15",road:"16-17"},
+  "Philadelphia 76ers":     {conf:"E",div:"Atlántico",o:114.1,d:112.8,f:0.536,p:98.1,w:37,l:31,streak:1,home:"21-14",road:"16-17"},
+  "Houston Rockets":        {conf:"W",div:"Suroeste", o:112.8,d:110.5,f:0.618,p:97.5,w:43,l:25,streak:4,home:"24-11",road:"19-14"},
+  "LA Clippers":            {conf:"W",div:"Pacífico", o:113.1,d:114.2,f:0.482,p:96.9,w:33,l:35,streak:-1,home:"18-17",road:"15-18"},
+  "Atlanta Hawks":          {conf:"E",div:"Sureste",  o:113.6,d:115.8,f:0.474,p:100.3,w:33,l:35,streak:-3,home:"18-17",road:"15-18"},
+  "Miami Heat":             {conf:"E",div:"Sureste",  o:113.4,d:113.7,f:0.527,p:96.2,w:37,l:31,streak:2,home:"20-15",road:"17-16"},
+  "Milwaukee Bucks":        {conf:"E",div:"Central",  o:112.9,d:115.1,f:0.444,p:98.7,w:31,l:37,streak:-4,home:"17-18",road:"14-19"},
+  "Orlando Magic":          {conf:"E",div:"Sureste",  o:112.1,d:113.4,f:0.527,p:95.8,w:37,l:31,streak:1,home:"21-14",road:"16-17"},
+  "Portland Trail Blazers": {conf:"W",div:"Noroeste", o:112.5,d:115.3,f:0.474,p:98.8,w:33,l:35,streak:-2,home:"18-17",road:"15-18"},
+  "Chicago Bulls":          {conf:"E",div:"Central",  o:112.3,d:115.6,f:0.421,p:97.8,w:29,l:39,streak:-1,home:"16-19",road:"13-20"},
+  "Charlotte Hornets":      {conf:"E",div:"Sureste",  o:111.8,d:116.4,f:0.404,p:99.4,w:28,l:40,streak:-2,home:"15-20",road:"13-21"},
+  "Toronto Raptors":        {conf:"E",div:"Atlántico",o:111.2,d:116.1,f:0.393,p:97.6,w:27,l:41,streak:-3,home:"15-20",road:"12-21"},
+  "Dallas Mavericks":       {conf:"W",div:"Suroeste", o:110.4,d:116.8,f:0.345,p:97.9,w:24,l:44,streak:-5,home:"13-22",road:"11-23"},
+  "Memphis Grizzlies":      {conf:"W",div:"Suroeste", o:109.3,d:117.2,f:0.316,p:100.8,w:22,l:46,streak:-2,home:"12-23",road:"10-24"},
+  "Utah Jazz":              {conf:"W",div:"Noroeste", o:109.1,d:117.5,f:0.316,p:101.5,w:22,l:46,streak:1,home:"13-22",road:"9-24"},
+  "Washington Wizards":     {conf:"E",div:"Sureste",  o:109.5,d:118.2,f:0.291,p:98.3,w:20,l:48,streak:-3,home:"11-24",road:"9-25"},
+  "San Antonio Spurs":      {conf:"W",div:"Suroeste", o:108.9,d:118.7,f:0.286,p:100.4,w:20,l:48,streak:-4,home:"11-24",road:"9-25"},
+  "New Orleans Pelicans":   {conf:"W",div:"Suroeste", o:108.1,d:118.4,f:0.276,p:96.7,w:19,l:49,streak:-2,home:"11-24",road:"8-25"},
+  "Brooklyn Nets":          {conf:"E",div:"Atlántico",o:108.4,d:119.3,f:0.273,p:98.9,w:19,l:49,streak:-3,home:"10-25",road:"9-24"},
+  "Sacramento Kings":       {conf:"W",div:"Pacífico", o:107.8,d:119.1,f:0.232,p:101.2,w:16,l:52,streak:-5,home:"9-26",road:"7-26"}
+};
+
+// ═══════════════════════════════════════════════════════
+// DATABASE — MLB (30 equipos, temporada 2026)
+// ═══════════════════════════════════════════════════════
+const MLB_DB = {
+  "New York Yankees":      {div:"AL Este",   lg:"AL",off:4.80,era:3.75,bull:3.60,pf:1.07,pay:310,w:92,l:70,sv:48,era_sp:3.55,whip:1.14,avg:0.268,obp:0.341,slg:0.445,ops:0.786,hr:210,sb:82},
+  "Toronto Blue Jays":     {div:"AL Este",   lg:"AL",off:4.55,era:4.05,bull:3.90,pf:1.02,pay:210,w:85,l:77,sv:41,era_sp:3.88,whip:1.21,avg:0.258,obp:0.328,slg:0.428,ops:0.756,hr:192,sb:98},
+  "Boston Red Sox":        {div:"AL Este",   lg:"AL",off:4.52,era:4.20,bull:4.10,pf:1.06,pay:175,w:83,l:79,sv:39,era_sp:4.02,whip:1.24,avg:0.262,obp:0.336,slg:0.432,ops:0.768,hr:185,sb:71},
+  "Baltimore Orioles":     {div:"AL Este",   lg:"AL",off:4.38,era:3.95,bull:3.80,pf:1.04,pay:95, w:86,l:76,sv:44,era_sp:3.78,whip:1.18,avg:0.255,obp:0.322,slg:0.422,ops:0.744,hr:198,sb:115},
+  "Tampa Bay Rays":        {div:"AL Este",   lg:"AL",off:4.20,era:3.65,bull:3.50,pf:0.95,pay:75, w:88,l:74,sv:46,era_sp:3.48,whip:1.15,avg:0.248,obp:0.318,slg:0.408,ops:0.726,hr:168,sb:142},
+  "Minnesota Twins":       {div:"AL Central",lg:"AL",off:4.30,era:3.90,bull:3.75,pf:1.00,pay:130,w:84,l:78,sv:42,era_sp:3.72,whip:1.19,avg:0.256,obp:0.325,slg:0.418,ops:0.743,hr:180,sb:88},
+  "Kansas City Royals":    {div:"AL Central",lg:"AL",off:4.15,era:4.00,bull:3.85,pf:1.02,pay:105,w:82,l:80,sv:40,era_sp:3.82,whip:1.21,avg:0.252,obp:0.319,slg:0.410,ops:0.729,hr:172,sb:110},
+  "Cleveland Guardians":   {div:"AL Central",lg:"AL",off:4.10,era:3.60,bull:3.45,pf:0.97,pay:90, w:87,l:75,sv:45,era_sp:3.42,whip:1.13,avg:0.249,obp:0.316,slg:0.405,ops:0.721,hr:162,sb:125},
+  "Detroit Tigers":        {div:"AL Central",lg:"AL",off:4.05,era:3.80,bull:3.70,pf:0.96,pay:120,w:84,l:78,sv:38,era_sp:3.64,whip:1.18,avg:0.251,obp:0.320,slg:0.412,ops:0.732,hr:174,sb:95},
+  "Chicago White Sox":     {div:"AL Central",lg:"AL",off:3.75,era:4.85,bull:4.70,pf:1.00,pay:60, w:62,l:100,sv:28,era_sp:4.72,whip:1.38,avg:0.236,obp:0.302,slg:0.388,ops:0.690,hr:142,sb:78},
+  "Houston Astros":        {div:"AL Oeste",  lg:"AL",off:4.65,era:3.55,bull:3.40,pf:1.01,pay:220,w:90,l:72,sv:50,era_sp:3.38,whip:1.12,avg:0.265,obp:0.338,slg:0.440,ops:0.778,hr:205,sb:92},
+  "Texas Rangers":         {div:"AL Oeste",  lg:"AL",off:4.40,era:3.95,bull:3.85,pf:1.05,pay:185,w:86,l:76,sv:42,era_sp:3.78,whip:1.20,avg:0.259,obp:0.328,slg:0.425,ops:0.753,hr:188,sb:88},
+  "Los Angeles Angels":    {div:"AL Oeste",  lg:"AL",off:4.25,era:4.30,bull:4.20,pf:1.03,pay:150,w:78,l:84,sv:36,era_sp:4.14,whip:1.26,avg:0.253,obp:0.322,slg:0.415,ops:0.737,hr:178,sb:82},
+  "Seattle Mariners":      {div:"AL Oeste",  lg:"AL",off:4.10,era:3.50,bull:3.35,pf:0.93,pay:145,w:89,l:73,sv:47,era_sp:3.32,whip:1.10,avg:0.248,obp:0.314,slg:0.402,ops:0.716,hr:155,sb:118},
+  "Athletics":             {div:"AL Oeste",  lg:"AL",off:3.85,era:4.50,bull:4.40,pf:0.98,pay:55, w:68,l:94,sv:30,era_sp:4.34,whip:1.32,avg:0.240,obp:0.305,slg:0.392,ops:0.697,hr:148,sb:95},
+  "New York Mets":         {div:"NL Este",   lg:"NL",off:4.50,era:3.80,bull:3.70,pf:1.03,pay:340,w:88,l:74,sv:44,era_sp:3.62,whip:1.17,avg:0.260,obp:0.330,slg:0.432,ops:0.762,hr:195,sb:85},
+  "Atlanta Braves":        {div:"NL Este",   lg:"NL",off:4.75,era:3.70,bull:3.60,pf:1.04,pay:230,w:91,l:71,sv:46,era_sp:3.52,whip:1.15,avg:0.268,obp:0.340,slg:0.448,ops:0.788,hr:215,sb:112},
+  "Philadelphia Phillies": {div:"NL Este",   lg:"NL",off:4.70,era:3.75,bull:3.65,pf:1.06,pay:230,w:90,l:72,sv:45,era_sp:3.58,whip:1.16,avg:0.266,obp:0.338,slg:0.445,ops:0.783,hr:208,sb:78},
+  "Washington Nationals":  {div:"NL Este",   lg:"NL",off:3.90,era:4.40,bull:4.30,pf:1.02,pay:90, w:71,l:91,sv:32,era_sp:4.22,whip:1.28,avg:0.242,obp:0.308,slg:0.395,ops:0.703,hr:152,sb:88},
+  "Miami Marlins":         {div:"NL Este",   lg:"NL",off:3.80,era:3.90,bull:3.80,pf:0.94,pay:65, w:74,l:88,sv:35,era_sp:3.72,whip:1.19,avg:0.238,obp:0.302,slg:0.385,ops:0.687,hr:140,sb:98},
+  "Chicago Cubs":          {div:"NL Central",lg:"NL",off:4.30,era:4.10,bull:4.00,pf:1.05,pay:195,w:82,l:80,sv:40,era_sp:3.92,whip:1.22,avg:0.256,obp:0.325,slg:0.420,ops:0.745,hr:180,sb:82},
+  "St. Louis Cardinals":   {div:"NL Central",lg:"NL",off:4.20,era:4.00,bull:3.90,pf:0.99,pay:155,w:80,l:82,sv:38,era_sp:3.82,whip:1.20,avg:0.252,obp:0.318,slg:0.410,ops:0.728,hr:168,sb:75},
+  "Cincinnati Reds":       {div:"NL Central",lg:"NL",off:4.15,era:4.20,bull:4.10,pf:1.08,pay:105,w:79,l:83,sv:37,era_sp:4.02,whip:1.23,avg:0.252,obp:0.320,slg:0.412,ops:0.732,hr:172,sb:88},
+  "Milwaukee Brewers":     {div:"NL Central",lg:"NL",off:4.05,era:3.55,bull:3.45,pf:1.00,pay:110,w:86,l:76,sv:44,era_sp:3.38,whip:1.13,avg:0.248,obp:0.312,slg:0.402,ops:0.714,hr:160,sb:105},
+  "Pittsburgh Pirates":    {div:"NL Central",lg:"NL",off:3.80,era:4.15,bull:4.05,pf:0.97,pay:75, w:72,l:90,sv:33,era_sp:3.98,whip:1.24,avg:0.238,obp:0.302,slg:0.385,ops:0.687,hr:142,sb:92},
+  "Los Angeles Dodgers":   {div:"NL Oeste",  lg:"NL",off:4.90,era:3.40,bull:3.30,pf:0.98,pay:395,w:95,l:67,sv:52,era_sp:3.22,whip:1.08,avg:0.272,obp:0.348,slg:0.458,ops:0.806,hr:222,sb:96},
+  "San Diego Padres":      {div:"NL Oeste",  lg:"NL",off:4.45,era:3.65,bull:3.55,pf:0.96,pay:240,w:88,l:74,sv:45,era_sp:3.48,whip:1.14,avg:0.260,obp:0.330,slg:0.430,ops:0.760,hr:196,sb:108},
+  "Arizona Diamondbacks":  {div:"NL Oeste",  lg:"NL",off:4.35,era:3.85,bull:3.75,pf:1.01,pay:135,w:85,l:77,sv:42,era_sp:3.68,whip:1.17,avg:0.255,obp:0.322,slg:0.418,ops:0.740,hr:178,sb:122},
+  "San Francisco Giants":  {div:"NL Oeste",  lg:"NL",off:4.20,era:4.05,bull:3.95,pf:0.92,pay:165,w:80,l:82,sv:38,era_sp:3.88,whip:1.21,avg:0.252,obp:0.318,slg:0.410,ops:0.728,hr:168,sb:88},
+  "Colorado Rockies":      {div:"NL Oeste",  lg:"NL",off:4.45,era:4.60,bull:4.50,pf:1.21,pay:90, w:68,l:94,sv:29,era_sp:4.42,whip:1.33,avg:0.258,obp:0.322,slg:0.428,ops:0.750,hr:190,sb:78}
+};
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let state = {
+  bankroll: 1000,
+  kellyFrac: 0.30,
+  picks: [],
+  currentSport: 'nba',
+  nbaFilter: 'all',
+  mlbFilter: 'all',
+  histFilter: 'all'
+};
+
+// ═══════════════════════════════════════════════════════
+// STORAGE (localStorage as DB)
+// ═══════════════════════════════════════════════════════
+function saveState(){
+  try{localStorage.setItem('bw_state', JSON.stringify({bankroll:state.bankroll,kellyFrac:state.kellyFrac,picks:state.picks}));}catch(e){}
+}
+function loadState(){
+  try{
+    const s=JSON.parse(localStorage.getItem('bw_state')||'{}');
+    if(s.bankroll) state.bankroll=s.bankroll;
+    if(s.kellyFrac) state.kellyFrac=s.kellyFrac;
+    if(s.picks) state.picks=s.picks;
+  }catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
+function pct(v,d=1){return(v*100).toFixed(d)+'%';}
+function fmt$(n){return n<0?'-$'+Math.abs(n).toFixed(0):'$'+n.toFixed(0);}
+function fmtK(n){return n>=1000?'$'+(n/1000).toFixed(1)+'k':'$'+n.toFixed(0);}
+function randNorm(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function normCDF(z){const t=1/(1+.2316419*Math.abs(z));const p=t*(.31938-.35656*t+1.78148*t*t-1.82126*t*t*t+1.33027*t*t*t*t);const r=1-Math.exp(-z*z/2)/Math.sqrt(2*Math.PI)*p;return z>=0?r:1-r;}
+function kelly(prob,odds=1.91,frac=null){
+  const f=frac!==null?frac:state.kellyFrac;
+  const b=odds-1,q=1-prob,k=(b*prob-q)/b;
+  return Math.max(0,Math.min(k*f,.12));
+}
+function kColor(k){return k>=.06?'g':k>=.025?'o':'r';}
+function sigColor(t){const m={va:'#00e07a',sh:'#4488ff',si:'#E8B84B',co:'#55aaff',st:'#ff3547',tr:'#b44dff'};return m[t]||'#E8B84B';}
+
+function showToast(msg,dur=2500){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
+}
+
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
+
+function showPanel(id,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  const labels={'dashboard':'Dashboard','analyzer':'Analizador','nba-db':'NBA Database','mlb-db':'MLB Database','history':'Mis Picks','performance':'Performance','kelly-calc':'Kelly Calculator','settings':'Configuración'};
+  document.getElementById('breadcrumb').textContent='/ '+(labels[id]||id);
+  if(id==='nba-db') renderNBATable();
+  if(id==='mlb-db') renderMLBTable();
+  if(id==='history') renderHistory();
+  if(id==='performance') renderPerformance();
+  if(id==='dashboard') renderDashboard();
+  if(id==='settings'){document.getElementById('settings-bank').value=state.bankroll;document.getElementById('storage-count').textContent=state.picks.length;document.getElementById('storage-last').textContent=state.picks.length?new Date(state.picks[state.picks.length-1].date).toLocaleDateString():'—';}
+  if(id==='kelly-calc') calcKelly();
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════════════
+// BANKROLL
+// ═══════════════════════════════════════════════════════
+function updateBankrollUI(){
+  document.getElementById('bankroll-display').textContent=fmtK(state.bankroll);
+  document.getElementById('analyzer-bank').value=state.bankroll;
+}
+function openBankrollModal(){
+  document.getElementById('modal-bank-input').value=state.bankroll;
+  document.getElementById('bank-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('modal-bank-input').focus(),100);
+}
+function closeBankrollModal(){document.getElementById('bank-modal').classList.remove('open');}
+function confirmBankroll(){
+  const v=+document.getElementById('modal-bank-input').value;
+  if(v>0){state.bankroll=v;updateBankrollUI();saveState();showToast('✅ Bankroll actualizado: '+fmtK(v));}
+  closeBankrollModal();
+}
+function saveBankroll(){
+  const v=+document.getElementById('settings-bank').value;
+  if(v>0){state.bankroll=v;updateBankrollUI();saveState();showToast('✅ Bankroll guardado: '+fmtK(v));}
+}
+
+// ═══════════════════════════════════════════════════════
+// SPORT SWITCH
+// ═══════════════════════════════════════════════════════
+function switchSport(s){
+  state.currentSport=s;
+  document.getElementById('nba-form').style.display=s==='nba'?'':'none';
+  document.getElementById('mlb-form').style.display=s==='mlb'?'':'none';
+  document.getElementById('tab-nba').classList.toggle('on',s==='nba');
+  document.getElementById('tab-mlb').classList.toggle('on',s==='mlb');
+  document.getElementById('result-column').innerHTML='<div style="color:var(--muted);text-align:center;padding:60px 20px;border:1px dashed var(--border);border-radius:10px"><div style="font-size:2.5em;margin-bottom:10px">🎯</div><div style="font-size:.85em">El análisis aparecerá aquí</div><div style="font-size:.72em;margin-top:6px;color:var(--muted)">Selecciona dos equipos y presiona Analizar</div></div>';
+}
+
+// ═══════════════════════════════════════════════════════
+// POPULATE SELECTS
+// ═══════════════════════════════════════════════════════
+function populateNBASelects(){
+  const divs=["Atlántico","Central","Sureste","Noroeste","Pacífico","Suroeste"];
+  const grouped={};
+  Object.keys(NBA_DB).forEach(n=>{const d=NBA_DB[n].div;(grouped[d]=grouped[d]||[]).push(n);});
+  ['nba-home','nba-away'].forEach(id=>{
+    const sel=document.getElementById(id); sel.innerHTML='';
+    divs.forEach(d=>{
+      if(!grouped[d])return;
+      const og=document.createElement('optgroup'); og.label='── '+d+' ──';
+      grouped[d].forEach(n=>{
+        const t=NBA_DB[n], net=t.o-t.d;
+        const o=document.createElement('option'); o.value=n;
+        o.textContent=n+' ['+(t.w+'-'+t.l)+' Net:'+(net>=0?'+':'')+net.toFixed(1)+']';
+        og.appendChild(o);
+      });
+      sel.appendChild(og);
+    });
+  });
+  document.getElementById('nba-home').value='Boston Celtics';
+  document.getElementById('nba-away').value='Washington Wizards';
+  updateNBAPreview('home'); updateNBAPreview('away');
+}
+function populateMLBSelects(){
+  const divs=["AL Este","AL Central","AL Oeste","NL Este","NL Central","NL Oeste"];
+  const grouped={};
+  Object.keys(MLB_DB).forEach(n=>{const d=MLB_DB[n].div;(grouped[d]=grouped[d]||[]).push(n);});
+  ['mlb-home','mlb-away'].forEach(id=>{
+    const sel=document.getElementById(id); sel.innerHTML='';
+    divs.forEach(d=>{
+      if(!grouped[d])return;
+      const og=document.createElement('optgroup'); og.label='── '+d+' ──';
+      grouped[d].forEach(n=>{
+        const e=MLB_DB[n];
+        const o=document.createElement('option'); o.value=n;
+        o.textContent=n+' ['+e.w+'-'+e.l+' ERA:'+e.era+' OFF:'+e.off+']';
+        og.appendChild(o);
+      });
+      sel.appendChild(og);
+    });
+  });
+  document.getElementById('mlb-home').value='Los Angeles Dodgers';
+  document.getElementById('mlb-away').value='Atlanta Braves';
+  updateMLBPreview('home'); updateMLBPreview('away');
+}
+
+// ═══════════════════════════════════════════════════════
+// PREVIEWS
+// ═══════════════════════════════════════════════════════
+function updateNBAPreview(side){
+  const name=document.getElementById('nba-'+side).value;
+  const t=NBA_DB[name]; if(!t)return;
+  const net=t.o-t.d; const s=t.streak;
+  document.getElementById('nba-'+side+'-preview').innerHTML=`
+    <div class="tp-name">${name}</div>
+    <div class="tp-stats">
+      <span class="tp-pill hl">${t.w}-${t.l}</span>
+      <span class="tp-pill hl">Net ${net>=0?'+':''}${net.toFixed(1)}</span>
+      <span class="tp-pill">Off ${t.o}</span>
+      <span class="tp-pill">Def ${t.d}</span>
+      <span class="tp-pill">Pace ${t.p}</span>
+      <span class="tp-pill">Form ${pct(t.f,0)}</span>
+      <span class="tp-pill" style="color:${s>0?'var(--green)':'var(--red)'}">Streak ${s>0?'+'+s:s}</span>
+    </div>`;
+}
+function updateMLBPreview(side){
+  const name=document.getElementById('mlb-'+side).value;
+  const e=MLB_DB[name]; if(!e)return;
+  document.getElementById('mlb-'+side+'-preview').innerHTML=`
+    <div class="tp-name">${name}</div>
+    <div class="tp-stats">
+      <span class="tp-pill hl">${e.w}-${e.l}</span>
+      <span class="tp-pill hl">ERA ${e.era}</span>
+      <span class="tp-pill">OFF ${e.off}</span>
+      <span class="tp-pill">Bull ${e.bull}</span>
+      <span class="tp-pill">PF ${e.pf}</span>
+      <span class="tp-pill">OPS ${e.ops}</span>
+      <span class="tp-pill">HR ${e.hr}</span>
+      <span class="tp-pill">$${e.pay}M</span>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// NBA ENGINE
+// ═══════════════════════════════════════════════════════
+function runNBA(){
+  const hn=document.getElementById('nba-home').value;
+  const an=document.getElementById('nba-away').value;
+  if(!hn||!an||hn===an){showToast('⚠️ Selecciona dos equipos distintos');return;}
+  const tH=NBA_DB[hn], tA=NBA_DB[an];
+  const bank=+document.getElementById('analyzer-bank').value||state.bankroll;
+
+  const btn=document.getElementById('analyze-btn');
+  btn.textContent='⏳ SIMULANDO 60,000 PARTIDOS...'; btn.disabled=true;
+
+  setTimeout(()=>{
+    const netH=tH.o-tH.d, netA=tA.o-tA.d;
+    let spread=(netH-netA)*0.44+3.5;
+    const fH=0.7+0.3*tH.f, fA=0.7+0.3*tA.f;
+    spread*=(fH/fA);
+
+    const avgPace=(tH.p+tA.p)/2;
+    const expTotal=Math.max(196,Math.min(248,((tH.o+tA.o)/2)*(avgPace/98.5)*0.92));
+    const sigma=9.0+(avgPace-95)*0.18;
+
+    let wH=0,wA=0;
+    for(let i=0;i<60000;i++){const d=spread+randNorm()*sigma;d>0?wH++:wA++;}
+    const pH=wH/60000, pA=wA/60000;
+
+    const tSig=sigma*1.35;
+    const totLines=[210,215,220,225,230,235,240,245].map(l=>({line:l+0.5,over:1-normCDF((l+0.5-expTotal)/tSig),under:normCDF((l+0.5-expTotal)/tSig)})).filter(t=>t.over>0.05&&t.over<0.95);
+    const bTot=totLines.reduce((a,b)=>Math.abs(b.over-0.5)<Math.abs(a.over-0.5)?b:a,totLines[0]||{line:expTotal.toFixed(0),over:.5,under:.5});
+    const spreadLine=Math.round(spread*2)/2;
+    const pCover=1-normCDF((-spreadLine-spread)/sigma);
+
+    const kH=kelly(pH), kA=kelly(pA), kSprd=kelly(pCover);
+    const kOv=kelly(bTot.over), kUn=kelly(bTot.under);
+
+    const sigs=[];
+    const diff=Math.abs(pH-pA);
+    if(Math.abs(netH-netA)>8) sigs.push({type:'va',icon:'💎',t:'MISMATCH DE CALIDAD',d:`Diferencia de Net Rating ${(netH-netA)>0?'+':''}${(netH-netA).toFixed(1)} pts. Edge estadístico claro para ${netH>netA?hn:an}.`});
+    if(tH.f>0.65&&tA.f<0.40) sigs.push({type:'sh',icon:'📈',t:'MOMENTUM LOCAL — SHARP',d:`${hn} en forma alta (${pct(tH.f,0)}) vs ${an} en caída (${pct(tA.f,0)}). Sharp money sigue el momentum.`});
+    if(tA.f>0.65&&tH.f<0.40) sigs.push({type:'co',icon:'🔄',t:'CONTRARIAN — VISITA EN FORMA',d:`${an} llega en forma alta (${pct(tA.f,0)}). Walters apostaba contra el público cuando el visitante tiene momentum real.`});
+    if(avgPace<96.5) sigs.push({type:'si',icon:'🐢',t:'PACE LENTO — UNDER VALUE',d:`Pace promedio ${avgPace.toFixed(1)}/48 min. Total esperado: ${expTotal.toFixed(0)} pts. Under tiene valor estadístico.`});
+    if(avgPace>100.5) sigs.push({type:'tr',icon:'🚀',t:'PACE ALTO — OVER VALUE',d:`Pace ${avgPace.toFixed(1)}/48 min. Más posesiones = más puntos. Over tiene edge claro.`});
+    if(diff<0.07) sigs.push({type:'st',icon:'⚠️',t:'JUEGO PAREJO — ML SIN VALOR',d:'Probabilidades casi 50/50. El margen del libro destruye el EV en ML directo. Walters iría a totales.'});
+    if(tH.conf!==tA.conf) sigs.push({type:'si',icon:'🏆',t:'INTER-CONFERENCIA',d:'Los juegos inter-conferencia tienen menos información histórica directa. Peso mayor al Net Rating y form.'});
+    if(tH.streak>4) sigs.push({type:'va',icon:'🔥',t:'LOCAL EN RACHA GANADORA',d:`${hn} lleva ${tH.streak} victorias consecutivas. Steam move esperado hacia el local.`});
+    if(tA.streak>4) sigs.push({type:'sh',icon:'⚡',t:'VISITANTE EN RACHA',d:`${an} lleva ${tA.streak} victorias consecutivas. Cuidado con el line público.`});
+    if(tH.streak<-3) sigs.push({type:'st',icon:'📉',t:'LOCAL EN CAÍDA',d:`${hn} lleva ${Math.abs(tH.streak)} derrotas seguidas. Posible steam hacia el visitante.`});
+
+    const favT=pH>pA?hn:an; const favP=Math.max(pH,pA); const favK=pH>pA?kH:kA;
+    let verdict='';
+    if(diff<0.07) verdict=`Partido muy parejo — ${pct(favP)} vs ${pct(Math.min(pH,pA))}. <strong>Walters no apostaría el ML.</strong> Su jugada: <strong>${bTot.over>0.52?'Over':'Under'} ${bTot.line}</strong> (${pct(bTot.over>0.52?bTot.over:bTot.under)} prob). Kelly: ${pct(bTot.over>0.52?kOv:kUn,1)} = <strong>${fmt$(bank*(bTot.over>0.52?kOv:kUn))}</strong>.`;
+    else if(diff<0.14) verdict=`Ventaja moderada para <strong>${favT}</strong> (${pct(favP)}). Walters entraría con tamaño controlado. ML ${favT.split(' ').pop()} o ATS ${spreadLine>0?'+':''}${spreadLine.toFixed(1)}. Kelly: ${pct(favK,1)} = <strong>${fmt$(bank*favK)}</strong>.`;
+    else verdict=`Ventaja clara para <strong>${favT}</strong> (${pct(favP)}). Walters activaría Steam Move — ML + ATS al mismo tiempo. Spread modelo: ${spread>0?'+':''}${spread.toFixed(1)} pts. Kelly: ${pct(favK,1)} = <strong>${fmt$(bank*favK)}</strong>.`;
+
+    const avoids=[];
+    if(diff<0.06) avoids.push('ML directo — margen del libro elimina el EV.');
+    if(Math.abs(spreadLine)>15) avoids.push('ATS con spread >15 pts — riesgo de línea inflada.');
+
+    const confLvl=diff>0.13?'ALTA':diff>0.06?'MEDIA':'BAJA';
+    const result={
+      sport:'NBA', hn, an, pH, pA, spread, spreadLine, expTotal, bTot, pCover, kH, kA, kSprd, kOv, kUn, bank, sigs, verdict, avoids, favT, favP, favK, netH, netA, diff, confLvl,
+      rows:[
+        {lbl:hn.split(' ').pop()+' Gana',    p:pH,      col:'#4488ff',meta:'Cuota justa: '+(1/pH).toFixed(2)},
+        {lbl:an.split(' ').pop()+' Gana',    p:pA,      col:'#ff8c00',meta:'Cuota justa: '+(1/pA).toFixed(2)},
+        {lbl:'ATS Local ('+spreadLine+')',    p:pCover,  col:'#b44dff',meta:'Cuota justa: '+(1/pCover).toFixed(2)},
+        {lbl:'Over '+bTot.line,              p:bTot.over,col:'#00e07a',meta:'Total esp: '+expTotal.toFixed(0)},
+        {lbl:'Under '+bTot.line,             p:bTot.under,col:'#ff3547',meta:'Cuota justa: '+(1/bTot.under).toFixed(2)},
+      ],
+      kellys:[
+        {k:kH,    lbl:'ML '+hn.split(' ').pop(),  bank},
+        {k:kA,    lbl:'ML '+an.split(' ').pop(),  bank},
+        {k:kSprd, lbl:'ATS Spread',               bank},
+        {k:kOv,   lbl:'Over '+bTot.line,          bank},
+        {k:kUn,   lbl:'Under '+bTot.line,         bank},
+        {k:favK,  lbl:'🤠 PICK PRINCIPAL',        bank, main:true, sub:favT.split(' ').pop()},
+      ],
+      statLine:`Net ${hn.split(' ').pop()}: ${netH>0?'+':''}${netH.toFixed(1)} · Net ${an.split(' ').pop()}: ${netA>0?'+':''}${netA.toFixed(1)} · Spread: ${spread>0?'+':''}${spread.toFixed(1)} pts · Total: ${expTotal.toFixed(0)} pts · MC 60k sims`
+    };
+
+    renderResult(result);
+    btn.textContent='🤠 ANALIZAR CON BILLY WALTERS'; btn.disabled=false;
+  },80);
+}
+
+// ═══════════════════════════════════════════════════════
+// MLB ENGINE
+// ═══════════════════════════════════════════════════════
+function runMLB(){
+  const hn=document.getElementById('mlb-home').value;
+  const an=document.getElementById('mlb-away').value;
+  if(!hn||!an||hn===an){showToast('⚠️ Selecciona dos equipos distintos');return;}
+  const eH=MLB_DB[hn], eA=MLB_DB[an];
+  const bank=+document.getElementById('analyzer-bank').value||state.bankroll;
+
+  const btn=document.getElementById('analyze-btn');
+  btn.textContent='⏳ SIMULANDO 60,000 PARTIDOS...'; btn.disabled=true;
+
+  setTimeout(()=>{
+    const MU=4.47, HFA=0.037;
+    const muOff=4.29, muEra=3.97, muBull=3.84;
+    const ll=Math.max(1.5,Math.min(10,MU*(eH.off/muOff)/(eA.era/muEra)*(muBull/eA.bull)*eH.pf*(1+HFA)));
+    const lv=Math.max(1.5,Math.min(10,MU*(eA.off/muOff)/(eH.era/muEra)*(muBull/eH.bull)*eH.pf*(1-HFA*0.5)));
+
+    function poisson(lam){if(lam<=0)return 0;let L=Math.exp(-lam),k=0,p=1;do{k++;p*=Math.random();}while(p>L);return k-1;}
+    let gH=0,gA=0,o75=0,o85=0,o95=0,o105=0,sumT=0,rlH=0;
+    const N=60000;
+    for(let i=0;i<N;i++){
+      let rh=poisson(ll),ra=poisson(lv);
+      if(rh===ra){Math.random()<.55?rh++:ra++;}
+      const tot=rh+ra;
+      if(rh>ra)gH++;else gA++;
+      if(tot>7.5)o75++;if(tot>8.5)o85++;if(tot>9.5)o95++;if(tot>10.5)o105++;
+      if(rh-ra>1.5)rlH++;
+      sumT+=tot;
+    }
+    const pH=gH/N, pA=gA/N, avgT=sumT/N;
+    const pO75=o75/N, pO85=o85/N, pO95=o95/N, pO105=o105/N, pU85=1-pO85;
+    const pRL=rlH/N;
+
+    const ar=eH.off/eA.off, dr=eA.era/eH.era, pd=(eH.pay-eA.pay)/200, ld=ll-lv, lp=ll/(ll+lv);
+    const rfP=1/(1+Math.exp(-(0.07+ld*.55+(ar-1)*.7+(dr-1)*.6+pd*.15+(lp-.5)*2.5)));
+    const gbP=1/(1+Math.exp(-(0.06+ld*.50+(ar-1)*.6+(dr-1)*.55+pd*.12+(lp-.5)*2.2)));
+    const ens=rfP*.4+gbP*.3+pH*.3, ensA=1-ens;
+
+    const kH=kelly(ens), kA=kelly(ensA), kRL=kelly(pRL);
+    const kO85=kelly(pO85), kO95=kelly(pO95), kU85=kelly(pU85);
+
+    const sigs=[];
+    const diff=Math.abs(ens-.5);
+    if(diff>0.10) sigs.push({type:'va',icon:'💎',t:'EDGE CLARO EN ML',d:`Ensemble ${pct(Math.max(ens,ensA))} para ${ens>0.5?hn:an}. RF: ${pct(rfP)} · GB: ${pct(gbP)} · MC: ${pct(pH)}. Señal consistente.`});
+    if(eH.pf>1.12) sigs.push({type:'st',icon:'🏟️',t:'PARK FACTOR TRAMPA',d:`Park Factor ${eH.pf} en ${hn}. Sobrevalora al local. Walters apostaba visitante con buena ERA.`});
+    if(eH.era<3.60&&eH.bull<3.50) sigs.push({type:'va',icon:'💎',t:'PITCHEO ÉLITE LOCAL',d:`${hn} ERA ${eH.era} + Bullpen ${eH.bull}. Combinación de élite — Walters activaba size máximo.`});
+    if(eA.era<3.60&&eA.bull<3.50) sigs.push({type:'sh',icon:'🔄',t:'SHARP MONEY VISITANTE',d:`${an} ERA ${eA.era} + Bullpen ${eA.bull}. El mercado subestima visitantes con pitcheo élite.`});
+    if(eH.pay>eA.pay*2.5) sigs.push({type:'si',icon:'💰',t:'PAYROLL DOMINANTE LOCAL',d:`${hn} ($${eH.pay}M) vs ${an} ($${eA.pay}M). Inversión masiva refleja calidad de roster superior.`});
+    if(eA.pay>eH.pay*2.5) sigs.push({type:'co',icon:'💰',t:'PAYROLL DOMINANTE VISITANTE',d:`${an} ($${eA.pay}M) supera ampliamente al local ($${eH.pay}M). Walters seguía el dinero.`});
+    if(pO85>0.58) sigs.push({type:'va',icon:'📈',t:'OVER 8.5 CON EDGE',d:`${pct(pO85)} de probabilidad de Over 8.5. Media histórica MLB: 46.9%. Edge de ${((pO85-0.469)*100).toFixed(1)} pts.`});
+    if(pU85>0.60) sigs.push({type:'co',icon:'📉',t:'UNDER 8.5 CON EDGE',d:`Solo ${pct(pO85)} de prob de Over. Pitcheo dominante — perfil de bajo puntaje. Walters apostaba Under.`});
+    if(eH.div===eA.div) sigs.push({type:'si',icon:'⚔️',t:'DIVISIONAL GAME',d:'Walters daba más peso a juegos divisionales — equipos se conocen bien, partidos más cerrados.'});
+    if(diff<0.06) sigs.push({type:'st',icon:'⚠️',t:'ML SIN VALOR REAL',d:'Demasiado parejo para ML. Walters iría al mercado de totales donde hay más edge disponible.'});
+    if(eH.whip<1.15&&eA.whip<1.15) sigs.push({type:'co',icon:'🎯',t:'DUELO DE PITCHEO ÉLITE',d:`Ambos equipos con WHIP élite (${eH.whip} vs ${eA.whip}). Under 8.5 tiene valor extra.`});
+    if(eH.ops>0.780||eA.ops>0.780) sigs.push({type:'tr',icon:'💥',t:'OFENSIVA EXPLOSIVA',d:`${eH.ops>0.780?hn:an} con OPS ${eH.ops>0.780?eH.ops:eA.ops} — una de las mejores ofensivas. Over tiene valor.`});
+
+    const favT=ens>0.5?hn:an, favP=Math.max(ens,ensA), favK=ens>0.5?kH:kA;
+    let verdict='';
+    if(diff<0.06) verdict=`Partido muy parejo (${pct(favP)} vs ${pct(Math.min(ens,ensA))}). <strong>Walters no apostaría el ML.</strong> Su mercado: <strong>${pO85>0.52?'Over':'Under'} 8.5</strong> (${pct(pO85>0.52?pO85:pU85)} prob). Kelly: ${pct(pO85>0.52?kO85:kU85,1)} = <strong>${fmt$(bank*(pO85>0.52?kO85:kU85))}</strong>.`;
+    else if(diff<0.13) verdict=`Ventaja moderada para <strong>${favT}</strong> (Ensemble: ${pct(favP)}). Walters entraría con tamaño reducido. ML ${favT.split(' ').slice(-1)[0]}: Kelly ${pct(favK,1)} = <strong>${fmt$(bank*favK)}</strong>. Complementar con ${pO85>0.54?'Over 8.5':'Under 8.5'}.`;
+    else verdict=`Ventaja clara para <strong>${favT}</strong> (Ensemble: ${pct(favP)}). Walters activaría apuesta principal + Run Line. Kelly: ${pct(favK,1)} = <strong>${fmt$(bank*favK)}</strong>. Run Line -1.5: ${pct(pRL)} (Kelly: ${pct(kRL,1)} = ${fmt$(bank*kRL)}).`;
+
+    const avoids=[];
+    if(eH.pf>1.15) avoids.push(`ML de ${hn} a cuota corta — Park Factor ${eH.pf} infla percepción sin reflejar el pitcheo real.`);
+    if(diff<0.05) avoids.push('ML directo — probabilidades casi iguales, el margen del libro destruye el EV.');
+
+    const confLvl=diff>0.13?'ALTA':diff>0.06?'MEDIA':'BAJA';
+    const result={
+      sport:'MLB', hn, an, pH:ens, pA:ensA, sigs, verdict, avoids, favT, favP, favK, bank, diff, confLvl,
+      rows:[
+        {lbl:hn.split(' ').slice(-1)[0]+' Gana',  p:ens,   col:'#C8102E',meta:'Ensemble RF+GB+MC'},
+        {lbl:an.split(' ').slice(-1)[0]+' Gana',  p:ensA,  col:'#3d8bff',meta:'Cuota justa: '+(1/ensA).toFixed(2)},
+        {lbl:'Over 7.5 carreras',  p:pO75, col:'#b44dff', meta:'Media hist: 72.8%'},
+        {lbl:'Over 8.5 carreras',  p:pO85, col:'#00e07a', meta:'Media hist: 46.9%'},
+        {lbl:'Over 9.5 carreras',  p:pO95, col:'#ff8c00', meta:'Media hist: 37.2%'},
+        {lbl:'Under 8.5 carreras', p:pU85, col:'#ff3547', meta:'Cuota justa: '+(1/pU85).toFixed(2)},
+        {lbl:'Run Line -1.5',      p:pRL,  col:'#E8B84B', meta:'Cuota justa: '+(1/pRL).toFixed(2)},
+      ],
+      kellys:[
+        {k:kH,   lbl:'ML '+hn.split(' ').slice(-1)[0], bank},
+        {k:kA,   lbl:'ML '+an.split(' ').slice(-1)[0], bank},
+        {k:kO85, lbl:'Over 8.5',   bank},
+        {k:kO95, lbl:'Over 9.5',   bank},
+        {k:kU85, lbl:'Under 8.5',  bank},
+        {k:kRL,  lbl:'Run Line -1.5', bank},
+        {k:favK, lbl:'🤠 PICK PRINCIPAL', bank, main:true, sub:favT.split(' ').slice(-1)[0]},
+      ],
+      statLine:`λ Local: ${ll.toFixed(2)} · λ Visita: ${lv.toFixed(2)} · Total: ${avgT.toFixed(2)} · RF: ${pct(rfP)} · GB: ${pct(gbP)} · MC: ${pct(pH)}`
+    };
+
+    renderResult(result);
+    btn.textContent='🤠 ANALIZAR CON BILLY WALTERS'; btn.disabled=false;
+  },80);
+}
+
+function runAnalyzer(){
+  state.currentSport==='nba'?runNBA():runMLB();
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER RESULT
+// ═══════════════════════════════════════════════════════
+function renderResult(r){
+  const diff=r.diff;
+  const confCol=diff>0.13?'var(--green)':diff>0.06?'var(--orange)':'var(--red)';
+  const confBg=diff>0.13?'rgba(0,224,122,.06)':diff>0.06?'rgba(255,140,0,.06)':'rgba(255,53,71,.05)';
+  const confLvl=diff>0.13?'ALTA ⭐⭐⭐':diff>0.06?'MEDIA ⭐⭐':'BAJA ⭐';
+  const confBorderCol=diff>0.13?'rgba(0,224,122,.3)':diff>0.06?'rgba(255,140,0,.25)':'rgba(255,53,71,.2)';
+
+  const probsH=r.rows.map(row=>`
+    <div class="prow">
+      <div class="plbl">${row.lbl}</div>
+      <div class="pbar"><div class="pbf" style="width:${Math.max(4,row.p*100).toFixed(0)}%;background:${row.col}"><span>${pct(row.p)}</span></div></div>
+      <div class="pmeta">${row.meta}</div>
+    </div>`).join('');
+
+  const kellysH=r.kellys.map(k=>`
+    <div class="kcard ${k.main?'main':''}">
+      <div class="kval ${k.main?'bw':kColor(k.k)}">${pct(k.k,1)}</div>
+      <div class="klbl" ${k.main?'style="color:var(--gold)"':''}>${k.lbl}</div>
+      <div class="kamt" ${k.main?'style="color:var(--gold)"':''}>${fmt$(k.bank*k.k)}${k.sub?' → '+k.sub:''}</div>
+    </div>`).join('');
+
+  const sigsH=r.sigs.map(s=>`
+    <div class="sig-item" style="border-color:${sigColor(s.type)}">
+      <div><div class="si-title" style="color:${sigColor(s.type)}">${s.icon} ${s.t}</div><div class="si-desc">${s.d}</div></div>
+    </div>`).join('');
+
+  const avoidH=r.avoids.length?`<div class="avoid-box"><div class="av-title">⛔ Walters evitaría</div>${r.avoids.map(a=>`<div class="av-item">❌ ${a}</div>`).join('')}</div>`:'';
+
+  const pickData=JSON.stringify({sport:r.sport,hn:r.hn,an:r.an,pH:r.pH.toFixed(4),pA:r.pA.toFixed(4),favT:r.favT,favP:r.favP.toFixed(4),favK:r.favK.toFixed(4),bank:r.bank,conf:r.confLvl}).replace(/'/g,"\\'");
+
+  document.getElementById('result-column').innerHTML=`
+  <div class="result-wrap">
+    <div class="conf-badge" style="background:${confBg};border-color:${confBorderCol}">
+      <div class="conf-icon">${diff>0.13?'🎯':diff>0.06?'⚠️':'🔻'}</div>
+      <div>
+        <div class="conf-title" style="color:${confCol}">Confianza ${confLvl}</div>
+        <div class="conf-desc">${r.statLine||''}</div>
+      </div>
+    </div>
+
+    <div class="matchup-grid">
+      <div class="team-block home">
+        <div class="tb-name">${r.hn}</div>
+        <div class="tb-info">Local 🏠</div>
+        <div class="tb-prob" style="color:var(--blue)">${pct(r.pH)}</div>
+      </div>
+      <div class="vs-circle">VS</div>
+      <div class="team-block away">
+        <div class="tb-name">${r.an}</div>
+        <div class="tb-info">Visitante ✈️</div>
+        <div class="tb-prob" style="color:var(--orange)">${pct(r.pA)}</div>
+      </div>
+    </div>
+
+    <div class="prob-section">
+      <div class="section-label">📊 Probabilidades — Método Billy Walters</div>
+      ${probsH}
+    </div>
+
+    <div class="kelly-section">
+      <div class="section-label">💰 Kelly Criterion — Tamaño de Apuesta (Kelly Fraccional ${Math.round(state.kellyFrac*100)}%)</div>
+      <div class="kelly-grid">${kellysH}</div>
+    </div>
+
+    ${r.sigs.length?`<div class="signals-section"><div class="section-label">🔍 Señales Detectadas por el Método Walters</div>${sigsH}</div>`:''}
+
+    <div class="verdict-box">
+      <div class="verdict-lbl">🤠 Veredicto Billy Walters</div>
+      <div class="verdict-text">${r.verdict}</div>
+    </div>
+
+    ${avoidH}
+
+    <button class="save-btn" onclick='savePick(${pickData})'>💾 GUARDAR ESTE PICK EN HISTORIAL</button>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// SAVE / HISTORY
+// ═══════════════════════════════════════════════════════
+function savePick(d){
+  const pick={
+    id:Date.now(),
+    date:new Date().toISOString(),
+    sport:d.sport,
+    hn:d.hn, an:d.an,
+    pH:+d.pH, pA:+d.pA,
+    favT:d.favT, favP:+d.favP, favK:+d.favK,
+    bank:+d.bank,
+    amount:+(+d.bank * +d.favK).toFixed(0),
+    conf:d.conf,
+    result:'pending',
+    pnl:0
+  };
+  state.picks.unshift(pick);
+  saveState();
+  updateSidebarStats();
+  updatePicksBadge();
+  showToast('✅ Pick guardado en historial');
+}
+
+function updatePickResult(id, result){
+  const pick=state.picks.find(p=>p.id===id);
+  if(!pick)return;
+  pick.result=result;
+  const odds=1.91;
+  if(result==='win') pick.pnl=+(pick.amount*(odds-1)).toFixed(0);
+  else if(result==='loss') pick.pnl=-pick.amount;
+  else if(result==='push') pick.pnl=0;
+  else pick.pnl=0;
+  saveState();
+  updateSidebarStats();
+  renderHistory();
+  renderDashboard();
+}
+
+function clearHistory(){
+  state.picks=[];
+  saveState();
+  renderHistory();
+  renderDashboard();
+  updateSidebarStats();
+  updatePicksBadge();
+  showToast('🗑️ Historial limpiado');
+}
+
+function updatePicksBadge(){
+  document.getElementById('picks-badge').textContent=state.picks.length;
+}
+
+function updateSidebarStats(){
+  const settled=state.picks.filter(p=>p.result!=='pending');
+  const wins=settled.filter(p=>p.result==='win').length;
+  const wr=settled.length?Math.round(wins/settled.length*100)+'%':'—';
+  const pnl=state.picks.reduce((s,p)=>s+p.pnl,0);
+  document.getElementById('sb-picks').textContent=state.picks.length;
+  document.getElementById('sb-wr').textContent=wr;
+  document.getElementById('sb-pnl').textContent=fmt$(pnl);
+  document.getElementById('sb-pnl').style.color=pnl>=0?'var(--green)':'var(--red)';
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER HISTORY
+// ═══════════════════════════════════════════════════════
+let histFilter='all';
+function setHistFilter(f,el){
+  histFilter=f;
+  document.querySelectorAll('#panel-history .filter-btn').forEach(b=>b.classList.remove('on'));
+  if(el)el.classList.add('on');
+  renderHistory();
+}
+function renderHistory(){
+  let picks=[...state.picks];
+  if(histFilter==='NBA') picks=picks.filter(p=>p.sport==='NBA');
+  else if(histFilter==='MLB') picks=picks.filter(p=>p.sport==='MLB');
+  else if(histFilter==='pending') picks=picks.filter(p=>p.result==='pending');
+  else if(histFilter==='win') picks=picks.filter(p=>p.result==='win');
+  else if(histFilter==='loss') picks=picks.filter(p=>p.result==='loss');
+
+  const tbody=document.getElementById('history-tbody');
+  if(!picks.length){
+    tbody.innerHTML=`<tr><td colspan="9" style="padding:40px;text-align:center;color:var(--muted)"><span style="font-size:2em;display:block;margin-bottom:8px">📋</span>No hay picks${histFilter!=='all'?' con este filtro':' guardados aún'}</td></tr>`;
+    return;
+  }
+  tbody.innerHTML=picks.map(p=>`
+    <tr>
+      <td style="font-family:'DM Mono',monospace;font-size:.72em;color:var(--muted)">${new Date(p.date).toLocaleDateString('es')}</td>
+      <td><span class="badge ${p.sport.toLowerCase()}">${p.sport==='NBA'?'🏀':'⚾'} ${p.sport}</span></td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${p.hn} vs ${p.an}">${p.hn.split(' ').pop()} vs ${p.an.split(' ').pop()}</td>
+      <td style="font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.favT.split(' ').slice(-2).join(' ')}</td>
+      <td style="font-family:'DM Mono',monospace">${pct(p.favP)}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--gold)">${pct(p.favK,1)}</td>
+      <td style="font-family:'DM Mono',monospace">${fmt$(p.amount)}</td>
+      <td>
+        <select class="result-select" onchange="updatePickResult(${p.id},this.value)">
+          <option value="pending" ${p.result==='pending'?'selected':''}>⏳ Pendiente</option>
+          <option value="win" ${p.result==='win'?'selected':''}>✅ WIN</option>
+          <option value="loss" ${p.result==='loss'?'selected':''}>❌ LOSS</option>
+          <option value="push" ${p.result==='push'?'selected':''}>🔄 PUSH</option>
+        </select>
+      </td>
+      <td style="font-family:'DM Mono',monospace;font-weight:700;color:${p.result==='pending'?'var(--muted)':p.pnl>=0?'var(--green)':'var(--red)'}">${p.result==='pending'?'—':fmt$(p.pnl)}</td>
+    </tr>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════
+function renderDashboard(){
+  const picks=state.picks;
+  const settled=picks.filter(p=>p.result!=='pending');
+  const wins=settled.filter(p=>p.result==='win').length;
+  const losses=settled.filter(p=>p.result==='loss').length;
+  const wr=settled.length?pct(wins/settled.length):' —';
+  const pnl=picks.reduce((s,p)=>s+p.pnl,0);
+  const totalWagered=settled.reduce((s,p)=>s+p.amount,0);
+  const roi=totalWagered>0?pct(pnl/totalWagered):' —';
+
+  document.getElementById('dash-picks').textContent=picks.length;
+  document.getElementById('dash-picks-sub').textContent=settled.length+' completados, '+(picks.length-settled.length)+' pendientes';
+  document.getElementById('dash-wr').textContent=wr;
+  document.getElementById('dash-wr-sub').textContent=wins+' ganados de '+settled.length+' completados';
+  document.getElementById('dash-pnl').textContent=fmt$(pnl);
+  document.getElementById('dash-pnl').style.color=pnl>=0?'var(--green)':'var(--red)';
+  document.getElementById('dash-pnl-sub').style.color=pnl>=0?'var(--green)':'var(--red)';
+  document.getElementById('dash-pnl-sub').textContent=(pnl>=0?'▲ Ganancia neta':'▼ Pérdida neta')+' acumulada';
+  document.getElementById('dash-roi').textContent=roi;
+  document.getElementById('dash-wins').textContent=wins;
+  document.getElementById('dash-losses').textContent=losses;
+
+  // Sport breakdown
+  const nbaP=picks.filter(p=>p.sport==='NBA');
+  const mlbP=picks.filter(p=>p.sport==='MLB');
+  const nbaS=nbaP.filter(p=>p.result!=='pending');
+  const mlbS=mlbP.filter(p=>p.result!=='pending');
+  const nbaW=nbaS.filter(p=>p.result==='win').length;
+  const mlbW=mlbS.filter(p=>p.result==='win').length;
+  document.getElementById('nba-record').textContent=nbaW+'-'+(nbaS.length-nbaW)+(nbaS.length?` (${pct(nbaW/nbaS.length,0)})`:'');
+  document.getElementById('mlb-record').textContent=mlbW+'-'+(mlbS.length-mlbW)+(mlbS.length?` (${pct(mlbW/mlbS.length,0)})`:'');
+  document.getElementById('nba-bar').style.width=(nbaS.length?nbaW/nbaS.length*100:0)+'%';
+  document.getElementById('mlb-bar').style.width=(mlbS.length?mlbW/mlbS.length*100:0)+'%';
+
+  // Recent picks
+  const recent=picks.slice(0,5);
+  const rl=document.getElementById('recent-picks-list');
+  if(!recent.length){rl.innerHTML='<div class="empty-state"><span class="es-icon">🎯</span><div class="es-text">No hay picks aún</div><div class="es-sub">Usa el Analizador para generar picks</div></div>';return;}
+  rl.innerHTML=recent.map(p=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg2);border-radius:8px;margin-bottom:6px;border:1px solid var(--border)">
+      <span style="font-size:.9em">${p.sport==='NBA'?'🏀':'⚾'}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.78em;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.favT.split(' ').slice(-2).join(' ')}</div>
+        <div style="font-size:.64em;color:var(--muted);font-family:'DM Mono',monospace">${p.hn.split(' ').pop()} vs ${p.an.split(' ').pop()} · ${fmt$(p.amount)}</div>
+      </div>
+      <span class="badge ${p.result}">${p.result==='pending'?'⏳':p.result==='win'?'✅':p.result==='loss'?'❌':'🔄'} ${p.result==='pending'?'Pend.':p.result.toUpperCase()}</span>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// PERFORMANCE
+// ═══════════════════════════════════════════════════════
+function renderPerformance(){
+  const picks=state.picks;
+  const settled=picks.filter(p=>p.result!=='pending');
+  if(!settled.length){
+    ['pnl-chart-container','perf-stats','perf-nba','perf-mlb','perf-conf'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)el.innerHTML='<div class="empty-state" style="padding:20px"><span class="es-icon" style="font-size:1.5em">📊</span><div class="es-text" style="font-size:.75em">Sin datos suficientes</div></div>';
+    });
+    return;
+  }
+
+  // P&L chart (mini bar chart)
+  const last20=settled.slice(-20);
+  let cum=0;
+  const points=last20.map(p=>{cum+=p.pnl;return cum;});
+  const maxP=Math.max(...points.map(Math.abs),1);
+  document.getElementById('pnl-chart-container').innerHTML=`
+    <div style="width:100%">
+      <div class="mini-chart">
+        ${points.map((v,i)=>`<div class="mc-bar" style="height:${Math.max(8,(Math.abs(v)/maxP)*100)}%;background:${v>=0?'var(--green)':'var(--red)'};opacity:${0.4+0.6*(i/points.length)}" title="${fmt$(v)}"></div>`).join('')}
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:.62em;color:var(--muted);font-family:'DM Mono',monospace;margin-top:4px"><span>Últimos ${last20.length} picks</span><span style="color:${cum>=0?'var(--green)':'var(--red)'}">${fmt$(cum)}</span></div>
+    </div>`;
+
+  // Stats
+  const wins=settled.filter(p=>p.result==='win').length;
+  const losses=settled.filter(p=>p.result==='loss').length;
+  const pushes=settled.filter(p=>p.result==='push').length;
+  const pnl=settled.reduce((s,p)=>s+p.pnl,0);
+  const wagered=settled.reduce((s,p)=>s+p.amount,0);
+  const avgK=settled.reduce((s,p)=>s+p.favK,0)/settled.length;
+  const avgConf=settled.filter(p=>p.conf==='ALTA').length;
+  document.getElementById('perf-stats').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      ${[['Win Rate',pct(wins/settled.length),'var(--green)'],['P&L',fmt$(pnl),pnl>=0?'var(--green)':'var(--red)'],['ROI',wagered>0?pct(pnl/wagered):' —',pnl>=0?'var(--green)':'var(--red)'],['Wagered',fmt$(wagered),'var(--text)'],['Avg Kelly',pct(avgK,1),'var(--gold)'],['Alta Conf',avgConf+' picks','var(--blue)']].map(([l,v,c])=>`
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:10px;text-align:center">
+          <div style="font-family:'Bebas Neue',cursive;font-size:1.3em;color:${c}">${v}</div>
+          <div style="font-size:.6em;color:var(--muted);text-transform:uppercase;letter-spacing:1px">${l}</div>
+        </div>`).join('')}
+    </div>`;
+
+  // By sport
+  ['NBA','MLB'].forEach(sport=>{
+    const sp=settled.filter(p=>p.sport===sport);
+    const el=document.getElementById('perf-'+sport.toLowerCase());
+    if(!sp.length){el.innerHTML='<div style="color:var(--muted);font-size:.75em;padding:10px">Sin datos de '+sport+'</div>';return;}
+    const sw=sp.filter(p=>p.result==='win').length;
+    const spnl=sp.reduce((s,p)=>s+p.pnl,0);
+    el.innerHTML=`
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between"><span style="font-size:.75em">Win Rate</span><span style="font-family:'DM Mono',monospace;font-size:.75em;color:var(--green)">${pct(sw/sp.length)}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="font-size:.75em">Record</span><span style="font-family:'DM Mono',monospace;font-size:.75em">${sw}-${sp.length-sw}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="font-size:.75em">P&L</span><span style="font-family:'DM Mono',monospace;font-size:.75em;color:${spnl>=0?'var(--green)':'var(--red)'}">${fmt$(spnl)}</span></div>
+      </div>`;
+  });
+
+  // By confidence
+  const confData=[['ALTA','🎯'],['MEDIA','⚠️'],['BAJA','🔻']].map(([c,icon])=>{
+    const cp=settled.filter(p=>p.conf===c);
+    if(!cp.length)return null;
+    const cw=cp.filter(p=>p.result==='win').length;
+    return {c,icon,count:cp.length,wr:pct(cw/cp.length),pnl:cp.reduce((s,p)=>s+p.pnl,0)};
+  }).filter(Boolean);
+  document.getElementById('perf-conf').innerHTML=confData.length?confData.map(d=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:var(--bg2);border-radius:7px;margin-bottom:6px">
+      <span style="font-size:.8em">${d.icon} ${d.c}</span>
+      <div style="text-align:right"><div style="font-family:'DM Mono',monospace;font-size:.78em;color:var(--green)">${d.wr}</div><div style="font-size:.62em;color:var(--muted)">${d.count} picks · ${fmt$(d.pnl)}</div></div>
+    </div>`).join(''):'<div style="color:var(--muted);font-size:.75em;padding:10px">Sin datos</div>';
+}
+
+// ═══════════════════════════════════════════════════════
+// NBA TABLE
+// ═══════════════════════════════════════════════════════
+let nbaFilter='all';
+function setNBAFilter(f,el){
+  nbaFilter=f;
+  document.querySelectorAll('#panel-nba-db .filter-btn').forEach(b=>b.classList.remove('on'));
+  if(el)el.classList.add('on');
+  renderNBATable();
+}
+function renderNBATable(){
+  const q=(document.getElementById('nba-search').value||'').toLowerCase();
+  const teams=Object.entries(NBA_DB)
+    .filter(([n,t])=>{
+      if(nbaFilter==='E'&&t.conf!=='E')return false;
+      if(nbaFilter==='W'&&t.conf!=='W')return false;
+      if(q&&!n.toLowerCase().includes(q))return false;
+      return true;
+    })
+    .sort((a,b)=>{const na=a[1].o-a[1].d,nb=b[1].o-b[1].d;return nb-na;});
+
+  const tbody=document.getElementById('nba-tbody');
+  tbody.innerHTML=teams.map(([name,t],i)=>{
+    const net=t.o-t.d;
+    const score=((net+15)/30*40+(t.f*30)+((t.p-95)/10*10)+((120-t.d)/20*20)).toFixed(0);
+    const barW=Math.min(100,Math.max(0,((net+20)/40)*100)).toFixed(0);
+    return `<tr class="team-row">
+      <td style="font-family:'DM Mono',monospace;color:var(--muted);font-size:.8em">${i+1}</td>
+      <td style="font-weight:600">${name}</td>
+      <td><span class="tag ${t.conf==='E'?'e':'w'}">${t.conf}</span></td>
+      <td style="font-size:.75em;color:var(--muted)">${t.div}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--green)">${t.o}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--red)">${t.d}</td>
+      <td style="font-family:'DM Mono',monospace;color:${net>=0?'var(--green)':'var(--red)'};font-weight:700">${net>=0?'+':''}${net.toFixed(1)}</td>
+      <td><span style="font-family:'DM Mono',monospace;font-size:.8em;color:${t.f>0.6?'var(--green)':t.f>0.4?'var(--orange)':'var(--red)'}">${pct(t.f,0)}</span></td>
+      <td style="font-family:'DM Mono',monospace">${t.p}</td>
+      <td><div class="rating-bar"><div class="rb-fill" style="width:${barW}%;background:${net>5?'var(--green)':net>0?'var(--gold)':'var(--red)'}"></div></div></td>
+    </tr>`;}).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// MLB TABLE
+// ═══════════════════════════════════════════════════════
+let mlbFilter='all';
+function setMLBFilter(f,el){
+  mlbFilter=f;
+  document.querySelectorAll('#panel-mlb-db .filter-btn').forEach(b=>b.classList.remove('on'));
+  if(el)el.classList.add('on');
+  renderMLBTable();
+}
+function renderMLBTable(){
+  const q=(document.getElementById('mlb-search').value||'').toLowerCase();
+  const teams=Object.entries(MLB_DB)
+    .filter(([n,e])=>{
+      if(mlbFilter==='AL'&&e.lg!=='AL')return false;
+      if(mlbFilter==='NL'&&e.lg!=='NL')return false;
+      if(q&&!n.toLowerCase().includes(q))return false;
+      return true;
+    })
+    .sort((a,b)=>{const sa=a[1].off/a[1].era, sb=b[1].off/b[1].era;return sb-sa;});
+
+  const tbody=document.getElementById('mlb-tbody');
+  tbody.innerHTML=teams.map(([name,e],i)=>{
+    const score=(e.off/4.47*30+(4.5-e.era)/1.5*30+(4.5-e.bull)/1.5*20+(e.pay/400)*10+(1-Math.abs(e.pf-1))*10).toFixed(0);
+    return `<tr class="team-row">
+      <td style="font-family:'DM Mono',monospace;color:var(--muted);font-size:.8em">${i+1}</td>
+      <td style="font-weight:600">${name}</td>
+      <td><span class="tag ${e.lg==='AL'?'al':'nl'}">${e.lg}</span></td>
+      <td style="font-size:.75em;color:var(--muted)">${e.div}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--green)">${e.off}</td>
+      <td style="font-family:'DM Mono',monospace;color:${e.era<3.70?'var(--green)':e.era<4.20?'var(--orange)':'var(--red)'}">${e.era}</td>
+      <td style="font-family:'DM Mono',monospace;color:${e.bull<3.60?'var(--green)':e.bull<4.00?'var(--orange)':'var(--red)'}">${e.bull}</td>
+      <td style="font-family:'DM Mono',monospace;color:${e.pf>1.10?'var(--red)':e.pf<0.97?'var(--green)':'var(--muted2)'}">${e.pf}</td>
+      <td style="font-family:'DM Mono',monospace;color:${e.pay>200?'var(--gold)':'var(--text)'}">$${e.pay}M</td>
+      <td><div class="rating-bar"><div class="rb-fill" style="width:${Math.min(100,+score)}%;background:${+score>70?'var(--green)':+score>50?'var(--gold)':'var(--red)'}"></div></div></td>
+    </tr>`;}).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// KELLY CALCULATOR
+// ═══════════════════════════════════════════════════════
+let kcFrac=0.30;
+function setKellyFrac(f,el){
+  kcFrac=f;
+  document.querySelectorAll('#panel-kelly-calc .filter-btn').forEach(b=>b.classList.remove('on'));
+  if(el)el.classList.add('on');
+  calcKelly();
+}
+function calcKelly(){
+  const prob=(+document.getElementById('kc-prob').value||55)/100;
+  const odds=+document.getElementById('kc-odds').value||1.91;
+  const bank=+document.getElementById('kc-bank').value||1000;
+  const b=odds-1, q=1-prob;
+  const kFull=(b*prob-q)/b;
+  const kFrac=Math.max(0,Math.min(kFull*kcFrac,.12));
+  const ev=(b*prob-q);
+  const hasEdge=ev>0;
+
+  document.getElementById('kelly-output').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      ${[
+        ['Kelly Full', kFull>0?pct(kFull,2):'Sin edge', kFull>0?'var(--orange)':'var(--red)'],
+        ['Kelly '+Math.round(kcFrac*100)+'% (Walters)', kFrac>0?pct(kFrac,2):'Sin edge', kFrac>0?'var(--green)':'var(--red)'],
+        ['Monto a apostar', kFrac>0?fmt$(bank*kFrac):'$0', kFrac>0?'var(--gold)':'var(--muted)'],
+        ['Expected Value', pct(ev,2), ev>0?'var(--green)':'var(--red)'],
+        ['Cuota justa', pct(prob), 'var(--blue)'],
+        ['Potencial ganancia', kFrac>0?fmt$(bank*kFrac*(odds-1)):'$0', 'var(--green)'],
+      ].map(([l,v,c])=>`
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-family:'Bebas Neue',cursive;font-size:1.4em;color:${c}">${v}</div>
+          <div style="font-size:.6em;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:3px">${l}</div>
+        </div>`).join('')}
+    </div>
+    <div style="background:${hasEdge?'rgba(0,224,122,.06)':'rgba(255,53,71,.05)'};border:1px solid ${hasEdge?'rgba(0,224,122,.2)':'rgba(255,53,71,.2)'};border-radius:8px;padding:12px">
+      <div style="font-size:.72em;color:${hasEdge?'var(--green)':'var(--red)'};font-weight:700;margin-bottom:4px">${hasEdge?'✅ Apuesta tiene VALOR (EV+)':'❌ Apuesta SIN valor (EV-)'}</div>
+      <div style="font-size:.72em;color:var(--muted2);line-height:1.7">
+        Con ${pct(prob)} de probabilidad real vs cuota ${odds.toFixed(2)} (implícita ${pct(1/odds)}):
+        ${hasEdge?`Edge de <strong style="color:var(--green)">${pct(ev,2)}</strong> por unidad apostada.`:`Déficit de <strong style="color:var(--red)">${pct(Math.abs(ev),2)}</strong> — el libro tiene ventaja.`}
+        ${kFrac>0?`Apostando ${fmt$(bank*kFrac)} a cuota ${odds.toFixed(2)}: ganarías <strong style="color:var(--green)">${fmt$(bank*kFrac*(odds-1))}</strong> o perderías <strong style="color:var(--red)">${fmt$(bank*kFrac)}</strong>.`:''}
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════════
+function setDefaultKelly(f,el){
+  state.kellyFrac=f;
+  kcFrac=f;
+  document.querySelectorAll('#panel-settings .filter-btn').forEach(b=>b.classList.remove('on'));
+  if(el)el.classList.add('on');
+  saveState();
+  showToast('✅ Kelly fraccionado: '+Math.round(f*100)+'%');
+}
+
+function exportData(){
+  const data=JSON.stringify({bankroll:state.bankroll,kellyFrac:state.kellyFrac,picks:state.picks,exportDate:new Date().toISOString()},null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='billy_walters_picks.json'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('📥 Datos exportados');
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+loadState();
+populateNBASelects();
+populateMLBSelects();
+updateBankrollUI();
+updateSidebarStats();
+updatePicksBadge();
+renderDashboard();
+
+// Modal close on overlay click
+document.getElementById('bank-modal').addEventListener('click',function(e){if(e.target===this)closeBankrollModal();});
+document.addEventListener('keydown',function(e){if(e.key==='Enter'&&document.getElementById('bank-modal').classList.contains('open'))confirmBankroll();});
+</script>
+</body>
+</html>
